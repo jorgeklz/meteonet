@@ -2,7 +2,7 @@
 :root {
   /* Debe coincidir con VERSION_ESTILOS en app.js. Si el navegador sirve una
      hoja vieja de la cache, la aplicacion lo detecta y recarga una vez. */
-  --version-estilos: 122;
+  --version-estilos: 123;
   --bg: #f7f8f5; --superficie: #ffffff; --superficie2: #f0f2ec; --borde: #e1e5db;
   --texto: #17220f; --texto2: #55604a; --texto3: #7f8a73;
   --g1: #1e6b14; --g2: #2e8a1f; --g3: #4aab30; --g4: #72c255; --g6: #e2f2da;
