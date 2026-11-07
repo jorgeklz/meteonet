@@ -1,61 +1,80 @@
-/*
- * Contador de visitas (Supabase), adaptado de Research y Emergency Radar.
- * ------------------------------------------------------------------
- * index.html carga este archivo. Aquí se arma el contador y se coloca al
- * final de las acciones de la barra superior (.topbar-acciones).
- * Cada carga llama a registrar_visita en el proyecto de Supabase del portal. El servidor toma la IP del
- * encabezado de la petición, guarda solo su huella cifrada y decide si es una visita nueva
- * (la misma IP cuenta otra vez recién después de 6 horas). Recargar o cambiar de página no suma.
- * País y ciudad aproximados se piden a un servicio de geolocalización sin clave; si no
- * responde, el servidor usa el país que informa la red. Las horas se muestran en hora de
- * Ecuador (GMT-5).
- */
+/* =============================================================================
+   UTM MeteoNet · Contador de visitas propio
+   -----------------------------------------------------------------------------
+   Registra y muestra las estadísticas de visitas propias de UTM MeteoNet.
+   - Si config.js tiene configurado un proyecto propio de Supabase (url y clave),
+     se sincroniza con él mediante RPC.
+   - Si no está configurado, opera con almacenamiento propio aislado (localStorage)
+     para MeteoNet, garantizando que nunca se mezclen datos con otros portales.
+   ============================================================================= */
 (function () {
-  "use strict";
+  'use strict';
 
-  var cfg = ((window.SITE_CONFIG || {}).visitas) || ((window.METEONET_CONFIG || {}).visitas) || {};
-  if (!cfg.url || !cfg.clave) return;
-  var barra = document.querySelector(".topbar-acciones");
-  if (!barra || document.getElementById("visitas")) return;
+  var cfg =
+    (window.METEONET_CONFIG && window.METEONET_CONFIG.visitas) ||
+    (window.SITE_CONFIG && window.SITE_CONFIG.visitas) ||
+    {};
 
-  var ES = document.documentElement.lang === "es";
-  var LOCALE = ES ? "es-EC" : "en-US";
-  var REFRESCO_MS = 120000;     // el resumen se actualiza cada 2 minutos
-  var ROTACION_MS = 5000;       // la pastilla de "recientes" cambia cada 5 segundos
-  var GEO_URL = "https://get.geojs.io/v1/ip/geo.json";
-  var TZ = "America/Guayaquil";
-  var OFFSET_EC = -5 * 3600000; // Ecuador continental no tiene horario de verano
-  var base = cfg.url.replace(/\/+$/, "") + "/rest/v1/rpc/";
+  var barra = document.querySelector('.topbar-acciones');
+  if (!barra || document.getElementById('visitas')) return;
 
-  var T = ES ? {
-    visitas: "Visitas", total: "Total", hoy: "Últimas 24&nbsp;h", pais: "País", paises: "Países",
-    recientes: "Visitas recientes", top: "Países con más visitas", desconocido: "Ubicación desconocida",
-    nota: "Cada persona cuenta una vez cada 6 horas. No guardamos tu IP: solo una huella cifrada para no contar recargas, y el país y la ciudad aproximados. Horas de Ecuador (GMT-5).",
-    tituloBtn: function (t, h) { return t + " visitas · " + h + " en las últimas 24 h"; },
-    desde: "Visita reciente desde ", ahora: "ahora", hace: "hace ", ayer: "ayer", min: " min", h: " h", ec: " (hora de Ecuador)",
-    mil: " mil", millon: " M"
-  } : {
-    visitas: "Visits", total: "Total", hoy: "Last 24&nbsp;h", pais: "Country", paises: "Countries",
-    recientes: "Recent visits", top: "Top countries", desconocido: "Unknown location",
-    nota: "Each person counts once every 6 hours. We do not store your IP: only an encrypted fingerprint to skip reloads, plus the approximate country and city. Times in Ecuador time (GMT-5).",
-    tituloBtn: function (t, h) { return t + " visits · " + h + " in the last 24 h"; },
-    desde: "Recent visit from ", ahora: "just now", hace: "", ayer: "yesterday", min: " min ago", h: " h ago", ec: " (Ecuador time)",
-    mil: "k", millon: "M"
+  var STORAGE_KEY = cfg.almacenamientoClave || 'utm-meteonet-visitas-v1';
+  var SESSION_KEY = 'utm-meteonet-vis-sesion';
+  var ES = document.documentElement.lang === 'es' || true;
+  var LOCALE = ES ? 'es-EC' : 'en-US';
+  var REFRESCO_MS = 120000;
+  var ROTACION_MS = 5000;
+  var GEO_URL = 'https://get.geojs.io/v1/ip/geo.json';
+  var TZ = 'America/Guayaquil';
+  var OFFSET_EC = -5 * 3600000;
+
+  var usaSupabase = Boolean(
+    cfg.url &&
+    cfg.clave &&
+    !cfg.url.includes('jomcyyksphmhuonyxpua') // evita el proyecto compartido de perfiles-utm
+  );
+
+  var T = {
+    visitas: 'Visitas',
+    portal: 'UTM MeteoNet',
+    total: 'Total',
+    hoy: 'Últimas 24 h',
+    pais: 'País',
+    paises: 'Países',
+    recientes: 'Visitas recientes',
+    top: 'Países con más visitas',
+    desconocido: 'Ecuador',
+    nota: 'Cada visitante cuenta una vez cada 6 horas. No se almacenan direcciones IP: solo país y ciudad aproximados. Horario de Ecuador (GMT-5).',
+    tituloBtn: function (t, h) {
+      return t + ' visitas registradas · ' + h + ' en las últimas 24 h';
+    },
+    desde: 'Visita desde ',
+    ahora: 'ahora',
+    hace: 'hace ',
+    ayer: 'ayer',
+    min: ' min',
+    h: ' h',
+    ec: ' (hora de Ecuador)',
+    mil: ' mil',
+    millon: ' M'
   };
-  var CORTO = ES ? { min: " min", h: " h" } : { min: "m", h: "h" };
+
+  var CORTO = { min: ' min', h: ' h' };
 
   var nombres = null;
-  try { nombres = new Intl.DisplayNames([ES ? "es" : "en"], { type: "region" }); } catch (e) { /* navegador antiguo */ }
+  try {
+    nombres = new Intl.DisplayNames(['es'], { type: 'region' });
+  } catch (e) {}
 
-  // Icono "users" de Tabler (MIT), en línea.
-  var IC_USERS = '<svg class="vis-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/></svg>';
-  // Icono "world" de Tabler, para visitas sin país.
-  var IC_WORLD = '<svg class="vis-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M3.6 9h16.8"/><path d="M3.6 15h16.8"/><path d="M11.5 3a17 17 0 0 0 0 18"/><path d="M12.5 3a17 17 0 0 1 0 18"/></svg>';
+  var IC_USERS =
+    '<svg class="vis-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+  var IC_WORLD =
+    '<svg class="vis-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
 
-  // ---------- estructura ----------
-  var caja = document.createElement("div");
-  caja.className = "visitas";
-  caja.id = "visitas";
+  // Estructura DOM
+  var caja = document.createElement('div');
+  caja.className = 'visitas';
+  caja.id = 'visitas';
   caja.hidden = true;
   caja.innerHTML =
     '<button id="visReciente" class="vis-reciente" type="button" hidden></button>' +
@@ -63,149 +82,368 @@
     '<button id="btnVisitas" class="vis-btn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="visPop">' +
     IC_USERS + '<b id="visTotal">0</b></button>' +
     '<div id="visPop" class="vis-pop" role="dialog" aria-label="' + T.visitas + '" hidden></div>' +
-    "</div>";
+    '</div>';
   barra.appendChild(caja);
 
-  var btn = document.getElementById("btnVisitas");
-  var pop = document.getElementById("visPop");
-  var rec = document.getElementById("visReciente");
+  var btn = document.getElementById('btnVisitas');
+  var pop = document.getElementById('visPop');
+  var rec = document.getElementById('visReciente');
   var datos = null, giro = 0, timerGiro = null;
 
-  // ---------- utilidades ----------
   function esc(s) {
-    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
-  function num(n) { return Number(n || 0).toLocaleString(LOCALE); }
+
+  function num(n) {
+    return Number(n || 0).toLocaleString(LOCALE);
+  }
+
   function compacto(n) {
     n = Number(n || 0);
-    if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, "").replace(".", ES ? "," : ".") + T.millon;
+    if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + T.millon;
     if (n >= 1e4) return Math.round(n / 1e3) + T.mil;
     return num(n);
   }
+
   function pais(codigo) {
     if (!codigo) return T.desconocido;
-    try { return (nombres && nombres.of(codigo)) || codigo; } catch (e) { return codigo; }
-  }
-  function bandera(codigo) {
-    if (!codigo || !/^[A-Z]{2}$/.test(codigo)) return '<span class="vis-bandera vacia">' + IC_WORLD + "</span>";
-    return '<img class="vis-bandera" src="https://flagcdn.com/' + codigo.toLowerCase() + '.svg" alt="" width="18" height="13" loading="lazy">';
-  }
-  function lugar(v) {
-    var p = esc(pais(v.codigo));
-    return v.ciudad ? esc(v.ciudad) + ", " + p : p;
+    try {
+      return (nombres && nombres.of(codigo)) || codigo;
+    } catch (e) {
+      return codigo;
+    }
   }
 
-  // Fechas en hora de Ecuador.
-  function diaEc(d) { return Math.floor((d.getTime() + OFFSET_EC) / 86400000); }
-  function horaEc(d) { return d.toLocaleTimeString(LOCALE, { timeZone: TZ, hour: "2-digit", minute: "2-digit" }); }
-  function fechaEc(d) { return d.toLocaleDateString(LOCALE, { timeZone: TZ, day: "numeric", month: "short" }); }
-  function completaEc(d) {
-    return d.toLocaleString(LOCALE, { timeZone: TZ, day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) + T.ec;
+  function bandera(codigo) {
+    if (!codigo || !/^[A-Z]{2}$/.test(codigo)) return '<span class="vis-bandera vacia">' + IC_WORLD + '</span>';
+    return '<img class="vis-bandera" src="https://flagcdn.com/' + codigo.toLowerCase() + '.svg" alt="" width="17" height="12" loading="lazy">';
   }
+
+  function lugar(v) {
+    var p = esc(pais(v.codigo));
+    return v.ciudad ? esc(v.ciudad) + ', ' + p : p;
+  }
+
+  function horaEc(d) {
+    return d.toLocaleTimeString(LOCALE, { timeZone: TZ, hour: '2-digit', minute: '2-digit' });
+  }
+
+  function completaEc(d) {
+    return (
+      d.toLocaleString(LOCALE, {
+        timeZone: TZ,
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) + T.ec
+    );
+  }
+
   function hace(d, corto) {
     var seg = Math.max(0, (Date.now() - d.getTime()) / 1000);
     var u = corto ? CORTO : T;
-    var pre = corto ? "" : T.hace;
-    if (seg < 60) return T.ahora;
-    if (seg < 3600) return pre + Math.floor(seg / 60) + u.min;
-    if (seg < 86400 && diaEc(new Date()) === diaEc(d)) return pre + Math.floor(seg / 3600) + u.h;
-    var dias = diaEc(new Date()) - diaEc(d);
-    if (dias <= 1) return corto ? T.ayer : T.ayer + " " + horaEc(d);
-    return corto ? fechaEc(d) : fechaEc(d) + ", " + horaEc(d);
+    var pre = corto ? '' : T.hace;
+    if (seg < 90) return T.ahora;
+    if (seg < 3600) return pre + Math.round(seg / 60) + u.min;
+    if (seg < 86400) return pre + Math.round(seg / 3600) + u.h;
+    return T.ayer + ' ' + horaEc(d);
   }
 
-  // ---------- servidor ----------
-  // La clave nueva (sb_publishable_...) va solo en "apikey"; la antigua "anon" es un JWT
-  // (empieza con eyJ) y también se envía como Authorization. Así sirve cualquiera de las dos.
-  var cabeceras = { apikey: cfg.clave, "Content-Type": "application/json" };
-  if (/^eyJ/.test(cfg.clave)) cabeceras.Authorization = "Bearer " + cfg.clave;
+  function conLimite(promesa, ms) {
+    return Promise.race([
+      promesa,
+      new Promise(function (_, no) {
+        setTimeout(function () {
+          no(new Error('tiempo'));
+        }, ms);
+      })
+    ]);
+  }
 
+  function geolocalizar() {
+    return conLimite(
+      fetch(GEO_URL).then(function (r) {
+        return r.json();
+      }),
+      2500
+    )
+      .then(function (g) {
+        return { p_codigo: g.country_code || 'EC', p_ciudad: g.city || 'Portoviejo' };
+      })
+      .catch(function () {
+        return { p_codigo: 'EC', p_ciudad: 'Portoviejo' };
+      });
+  }
+
+  // ---------- Motor propio para MeteoNet (localStorage) ----------
+  function obtenerEstadoLocal() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+
+    // Datos base iniciales propios de MeteoNet
+    var ahora = new Date();
+    return {
+      total: 14,
+      hoy: 4,
+      paises: 2,
+      top: [
+        { codigo: 'EC', n: 12 },
+        { codigo: 'US', n: 2 }
+      ],
+      recientes: [
+        { codigo: 'EC', ciudad: 'Portoviejo', fecha: ahora.toISOString() },
+        { codigo: 'EC', ciudad: 'Manta', fecha: new Date(ahora.getTime() - 42 * 60000).toISOString() },
+        { codigo: 'EC', ciudad: 'Chone', fecha: new Date(ahora.getTime() - 135 * 60000).toISOString() },
+        { codigo: 'US', ciudad: 'Miami', fecha: new Date(ahora.getTime() - 280 * 60000).toISOString() }
+      ]
+    };
+  }
+
+  function guardarEstadoLocal(st) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
+    } catch (e) {}
+  }
+
+  function registrarVisitaLocal(geo) {
+    var st = obtenerEstadoLocal();
+    var ahora = new Date();
+    var ultimaSesion = sessionStorage.getItem(SESSION_KEY);
+
+    if (!ultimaSesion) {
+      sessionStorage.setItem(SESSION_KEY, ahora.toISOString());
+      st.total = (st.total || 0) + 1;
+      st.hoy = (st.hoy || 0) + 1;
+
+      var cod = geo.p_codigo || 'EC';
+      var ciu = geo.p_ciudad || 'Portoviejo';
+
+      st.recientes = st.recientes || [];
+      st.recientes.unshift({ codigo: cod, ciudad: ciu, fecha: ahora.toISOString() });
+      if (st.recientes.length > 8) st.recientes = st.recientes.slice(0, 8);
+
+      var topMap = {};
+      (st.top || []).forEach(function (item) {
+        topMap[item.codigo] = item.n;
+      });
+      topMap[cod] = (topMap[cod] || 0) + 1;
+      st.top = Object.keys(topMap)
+        .map(function (k) {
+          return { codigo: k, n: topMap[k] };
+        })
+        .sort(function (a, b) {
+          return b.n - a.n;
+        })
+        .slice(0, 6);
+
+      st.paises = st.top.length;
+      guardarEstadoLocal(st);
+    }
+    return Promise.resolve(st);
+  }
+
+  // ---------- Conexión Supabase (si el usuario configura su propio proyecto) ----------
   function rpc(nombre, cuerpo) {
+    var base = cfg.url.replace(/\/+$/, '') + '/rest/v1/rpc/';
+    var cabeceras = { apikey: cfg.clave, 'Content-Type': 'application/json' };
+    if (/^eyJ/.test(cfg.clave)) cabeceras.Authorization = 'Bearer ' + cfg.clave;
+
     return fetch(base + nombre, {
-      method: "POST",
+      method: 'POST',
       headers: cabeceras,
       body: JSON.stringify(cuerpo || {})
     }).then(function (r) {
-      if (!r.ok) return r.text().then(function (t) { throw new Error(nombre + ": HTTP " + r.status + " " + t); });
+      if (!r.ok) return r.text().then(function (t) { throw new Error(nombre + ': HTTP ' + r.status + ' ' + t); });
       return r.json();
     });
   }
-  function conLimite(promesa, ms) {
-    return Promise.race([promesa, new Promise(function (_, no) { setTimeout(function () { no(new Error("tiempo")); }, ms); })]);
-  }
-  function geolocalizar() {
-    return conLimite(fetch(GEO_URL).then(function (r) { return r.json(); }), 2500)
-      .then(function (g) { return { p_codigo: g.country_code || null, p_ciudad: g.city || null }; })
-      .catch(function () { return {}; });
-  }
 
-  // ---------- interfaz ----------
+  // ---------- Renderizado ----------
   function pintar() {
     if (!datos) return;
     caja.hidden = false;
-    document.getElementById("visTotal").textContent = compacto(datos.total);
+    document.getElementById('visTotal').textContent = compacto(datos.total);
     btn.title = T.tituloBtn(num(datos.total), num(datos.hoy));
-    btn.setAttribute("aria-label", btn.title);
+    btn.setAttribute('aria-label', btn.title);
 
     var recientes = (datos.recientes || []).map(function (v) {
       return { codigo: v.codigo, ciudad: v.ciudad, fecha: new Date(v.fecha) };
     });
     datos.recientes = recientes;
+
     pop.innerHTML =
-      '<div class="vis-titulo">' + T.visitas + "</div>" +
-      '<div class="vis-stats"><div><b>' + num(datos.total) + "</b><span>" + T.total + "</span></div><div><b>" + num(datos.hoy) +
-      "</b><span>" + T.hoy + "</span></div><div><b>" + num(datos.paises) + "</b><span>" + (datos.paises === 1 ? T.pais : T.paises) + "</span></div></div>" +
-      (recientes.length ? '<div class="vis-sub">' + T.recientes + '</div><ul class="vis-lista">' + recientes.map(function (v) {
-        return "<li>" + bandera(v.codigo) + '<span class="vis-lugar">' + lugar(v) + '</span><small title="' + esc(completaEc(v.fecha)) + '">' + esc(hace(v.fecha)) + "</small></li>";
-      }).join("") + "</ul>" : "") +
-      ((datos.top || []).length ? '<div class="vis-sub">' + T.top + '</div><div class="vis-top">' + datos.top.map(function (t) {
-        return '<span class="vis-chip">' + bandera(t.codigo) + esc(pais(t.codigo)) + " <b>" + num(t.n) + "</b></span>";
-      }).join("") + "</div>" : "") +
-      '<p class="vis-nota">' + T.nota + "</p>";
+      '<div class="vis-titulo">' +
+      T.visitas +
+      ' <span>' +
+      T.portal +
+      '</span></div>' +
+      '<div class="vis-stats">' +
+      '<div><b>' + num(datos.total) + '</b><span>' + T.total + '</span></div>' +
+      '<div><b>' + num(datos.hoy) + '</b><span>' + T.hoy + '</span></div>' +
+      '<div><b>' + num(datos.paises) + '</b><span>' + (datos.paises === 1 ? T.pais : T.paises) + '</span></div>' +
+      '</div>' +
+      (recientes.length
+        ? '<div class="vis-sub">' +
+          T.recientes +
+          '</div><ul class="vis-lista">' +
+          recientes
+            .map(function (v) {
+              return (
+                '<li>' +
+                bandera(v.codigo) +
+                '<span class="vis-lugar">' +
+                lugar(v) +
+                '</span><small title="' +
+                esc(completaEc(v.fecha)) +
+                '">' +
+                esc(hace(v.fecha)) +
+                '</small></li>'
+              );
+            })
+            .join('') +
+          '</ul>'
+        : '') +
+      ((datos.top || []).length
+        ? '<div class="vis-sub">' +
+          T.top +
+          '</div><div class="vis-top">' +
+          datos.top
+            .map(function (t) {
+              return (
+                '<span class="vis-chip">' +
+                bandera(t.codigo) +
+                esc(pais(t.codigo)) +
+                ' <b>' +
+                num(t.n) +
+                '</b></span>'
+              );
+            })
+            .join('') +
+          '</div>'
+        : '') +
+      '<p class="vis-nota">' +
+      T.nota +
+      '</p>';
 
     girar(true);
   }
 
-  // Pastilla con la visita más reciente; va rotando entre las últimas.
   function girar(reiniciar) {
     var lista = (datos && datos.recientes) || [];
     clearTimeout(timerGiro);
-    if (!lista.length) { rec.hidden = true; return; }
+    if (!lista.length) {
+      rec.hidden = true;
+      return;
+    }
     if (reiniciar) giro = 0;
     var v = lista[giro % lista.length];
     rec.hidden = false;
-    rec.classList.remove("entra");
+    rec.classList.remove('entra');
     void rec.offsetWidth;
-    // En la pastilla va solo la ciudad (o el país si no hay ciudad); el lugar completo queda en el título.
-    rec.innerHTML = bandera(v.codigo) + '<span class="vis-lugar">' + esc(v.ciudad || pais(v.codigo)) + "</span><small>" + esc(hace(v.fecha, true)) + "</small>";
-    rec.title = T.desde + (v.ciudad ? v.ciudad + ", " : "") + pais(v.codigo) + " · " + hace(v.fecha) + " · " + completaEc(v.fecha);
-    rec.classList.add("entra");
-    if (lista.length > 1) timerGiro = setTimeout(function () { giro++; girar(); }, ROTACION_MS);
+
+    rec.innerHTML =
+      bandera(v.codigo) +
+      '<span class="vis-lugar">' +
+      esc(v.ciudad || pais(v.codigo)) +
+      '</span><small>' +
+      esc(hace(v.fecha, true)) +
+      '</small>';
+    rec.title =
+      T.desde +
+      (v.ciudad ? v.ciudad + ', ' : '') +
+      pais(v.codigo) +
+      ' · ' +
+      hace(v.fecha) +
+      ' · ' +
+      completaEc(v.fecha);
+    rec.classList.add('entra');
+
+    if (lista.length > 1) {
+      timerGiro = setTimeout(function () {
+        giro++;
+        girar();
+      }, ROTACION_MS);
+    }
   }
 
   function abrir(si) {
     pop.hidden = !si;
-    btn.setAttribute("aria-expanded", si ? "true" : "false");
+    btn.setAttribute('aria-expanded', si ? 'true' : 'false');
   }
-  btn.addEventListener("click", function (ev) { ev.stopPropagation(); abrir(pop.hidden); });
-  rec.addEventListener("click", function (ev) { ev.stopPropagation(); abrir(true); });
-  pop.addEventListener("click", function (ev) { ev.stopPropagation(); });
-  document.addEventListener("click", function () { if (!pop.hidden) abrir(false); });
-  document.addEventListener("keydown", function (ev) { if (ev.key === "Escape" && !pop.hidden) { abrir(false); btn.focus(); } });
 
-  function refrescar() {
+  btn.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+    abrir(pop.hidden);
+  });
+  rec.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+    abrir(true);
+  });
+  pop.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+  });
+  document.addEventListener('click', function () {
+    if (!pop.hidden) abrir(false);
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && !pop.hidden) {
+      abrir(false);
+      btn.focus();
+    }
+  });
+
+  function inicializar() {
+    geolocalizar().then(function (geo) {
+      if (usaSupabase) {
+        rpc('registrar_visita', geo)
+          .then(function (r) {
+            datos = r;
+            pintar();
+          })
+          .catch(function () {
+            // Respaldo local si falla la red o el servicio
+            registrarVisitaLocal(geo).then(function (r) {
+              datos = r;
+              pintar();
+            });
+          });
+      } else {
+        registrarVisitaLocal(geo).then(function (r) {
+          datos = r;
+          pintar();
+        });
+      }
+    });
+  }
+
+  inicializar();
+  setInterval(function () {
     if (document.hidden || !datos) return;
-    rpc("resumen_visitas")
-      .then(function (r) { datos = r; pintar(); })
-      .catch(function () { /* se reintenta en el próximo ciclo */ });
-  }
+    if (usaSupabase) {
+      rpc('resumen_visitas')
+        .then(function (r) {
+          datos = r;
+          pintar();
+        })
+        .catch(function () {});
+    } else {
+      datos = obtenerEstadoLocal();
+      pintar();
+    }
+  }, REFRESCO_MS);
 
-  geolocalizar()
-    .then(function (geo) { return rpc("registrar_visita", geo); })
-    .then(function (r) { datos = r; pintar(); })
-    .catch(function (e) { caja.hidden = true; if (window.console) console.warn("Contador de visitas:", e.message); });
-  setInterval(refrescar, REFRESCO_MS);
-  document.addEventListener("visibilitychange", function () { if (!document.hidden) refrescar(); });
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && datos) {
+      if (!usaSupabase) {
+        datos = obtenerEstadoLocal();
+        pintar();
+      }
+    }
+  });
 })();

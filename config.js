@@ -197,14 +197,19 @@ window.METEONET_CONFIG = {
   },
 
   /* ---------------------------------------------------------------------------
-     6. Contador de visitas (Supabase)
+     6. Contador de visitas
      ---------------------------------------------------------------------------
-     Mismo contador que en el portal de Investigadores UTM (perfiles-utm).
-     Registra visitas de forma anónima con huella cifrada cada 6 horas.
+     Contador independiente y exclusivo para UTM MeteoNet.
+     - url y clave: si configuras un proyecto en Supabase para MeteoNet, ponlas
+       aquí y ejecuta el script 'supabase/visitas.sql'.
+     - Si las dejas vacías, MeteoNet utiliza automáticamente su propio
+       almacenamiento local aislado para contabilizar visitas sin depender de
+       servicios externos ni mezclar datos con otros sitios.
   --------------------------------------------------------------------------- */
   visitas: {
-    url: 'https://jomcyyksphmhuonyxpua.supabase.co',
-    clave: 'sb_publishable_WNEWh_ecXbA81vdr4KQPgA_aAElm-AC',
+    url: '',
+    clave: '',
+    almacenamientoClave: 'utm-meteonet-visitas-v1',
   },
 };
 

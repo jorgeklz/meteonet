@@ -1776,10 +1776,12 @@ function renderMainWeatherMap() {
     /* El contenido se construye al abrir, no al crear el marcador: asi solo
        se consulta el historico de la estacion que la persona mira, y el
        patron por dia puede rellenarse cuando la ficha ya esta en pantalla. */
+    const esMovil = typeof window !== 'undefined' && window.innerWidth <= 768;
     marker.bindPopup(() => buildStationMeasurementCardHtml(st), {
       className: 'popup-meteonet-wrap',
-      maxWidth: 340,
-      minWidth: 300,
+      maxWidth: esMovil ? 250 : 340,
+      minWidth: esMovil ? 210 : 300,
+      autoPanPadding: [10, 60],
     });
     /* Al abrir la ficha se desplaza la pagina para que no quede detras de la
        cabecera fija, que en movil ocupa buena parte de lo alto. */

@@ -2667,7 +2667,8 @@ a.fv-chip-miembro:hover .fv-ico-in {
     max-height: 560px;
   }
   .leaflet-popup-content-wrapper.popup-meteonet-wrap .leaflet-popup-content {
-    width: 290px !important;
+    width: 245px !important;
+    max-width: calc(100vw - 36px) !important;
   }
   .web-footer-inner {
     flex-direction: column;
@@ -5054,36 +5055,109 @@ button[data-edit-station]:active {
 }
 
 /* ---------- Ficha de la estacion en movil ----------
-   El espacio vertical es escaso: se quita el bloque de alertas, que ya se
-   consulta tocando el chip de alerta del propio marcador, se compacta el
-   patron y se permite desplazar la ficha si aun asi no cabe. */
+   En móviles la ficha es ultra compacta para caber con total holgura dentro del mapa:
+   se oculta el bloque de 6 gráficas 24h (que se consultan en el panel principal)
+   y se estilizan las métricas esenciales con tipografía y espaciado optimizados. */
 @media (max-width: 768px) {
+  .leaflet-popup-content-wrapper.popup-meteonet-wrap {
+    border-radius: 8px !important;
+    border-width: 1px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22) !important;
+  }
+
+  .leaflet-popup-content-wrapper.popup-meteonet-wrap .leaflet-popup-content {
+    width: 245px !important;
+    max-width: calc(100vw - 36px) !important;
+    margin: 0 !important;
+  }
+
   .leaflet-popup-content .mapa-ficha-estacion {
-    /* Tope por debajo del alto del mapa, para que el globo nunca sobresalga
-       y la parte que no entre se pueda desplazar. */
-    max-height: 48vh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding-right: 2px;
+    max-height: none !important;
+    overflow-y: visible !important;
+    padding: 6px 8px 7px !important;
   }
 
+  .mfe-actualizacion {
+    font-size: 8px !important;
+    margin-bottom: 3px !important;
+    line-height: 1.15 !important;
+  }
+
+  .mfe-fila-principal {
+    gap: 6px !important;
+  }
+
+  .mfe-icono {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  .mfe-nombre {
+    font-size: 11.5px !important;
+    gap: 4px !important;
+  }
+
+  .mfe-cod-badge {
+    font-size: 8.5px !important;
+    padding: 0 4px !important;
+  }
+
+  .mfe-condicion {
+    font-size: 10px !important;
+  }
+
+  .mfe-temp {
+    font-size: 17px !important;
+  }
+
+  .mfe-temp span {
+    font-size: 9px !important;
+  }
+
+  .mfe-subresumen {
+    font-size: 8.5px !important;
+    margin-top: 2px !important;
+    line-height: 1.2 !important;
+  }
+
+  .mfe-separador {
+    margin: 4px 0 !important;
+  }
+
+  .mfe-grid-mediciones {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 3px !important;
+  }
+
+  .mfe-med-item {
+    padding: 3px 5px !important;
+    gap: 4px !important;
+    border-radius: 5px !important;
+  }
+
+  .mfe-ico-min {
+    width: 17px !important;
+    height: 17px !important;
+    border-radius: 4px !important;
+  }
+
+  .mfe-ico-min svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+
+  .mfe-med-txt small {
+    font-size: 8px !important;
+    line-height: 1.1 !important;
+  }
+
+  .mfe-med-txt span {
+    font-size: 9.5px !important;
+    line-height: 1.1 !important;
+  }
+
+  /* Ocultar las 6 gráficas de 24 horas dentro del popup móvil */
   .mfe-patron {
-    margin-top: 8px;
-    padding-top: 8px;
-  }
-
-  .mfp-fila {
-    grid-template-columns: 86px 1fr auto;
-    gap: 6px;
-    padding: 1px 0;
-  }
-
-  .mfp-curva {
-    height: 18px;
-  }
-
-  .mfp-dia,
-  .mfp-rango {
-    font-size: 10px;
+    display: none !important;
   }
 }
