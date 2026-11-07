@@ -2,7 +2,7 @@
 :root {
   /* Debe coincidir con VERSION_ESTILOS en app.js. Si el navegador sirve una
      hoja vieja de la cache, la aplicacion lo detecta y recarga una vez. */
-  --version-estilos: 121;
+  --version-estilos: 122;
   --bg: #f7f8f5; --superficie: #ffffff; --superficie2: #f0f2ec; --borde: #e1e5db;
   --texto: #17220f; --texto2: #55604a; --texto3: #7f8a73;
   --g1: #1e6b14; --g2: #2e8a1f; --g3: #4aab30; --g4: #72c255; --g6: #e2f2da;
@@ -1322,7 +1322,7 @@ a.fv-chip-miembro:hover .fv-ico-in {
 }
 
 .rv-titulo {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
   text-align: left;
   line-height: 1.1;
@@ -2663,7 +2663,7 @@ a.fv-chip-miembro:hover .fv-ico-in {
     height: 27px;
   }
   .rv-titulo {
-    font-size: 10px;
+    font-size: 11.5px;
   }
   .rv-valor {
     font-size: 15px;

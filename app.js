@@ -155,7 +155,7 @@ function formatTemp(valor) {
    La hoja declara `--version-estilos`; si no coincide con esta constante, se
    recarga una sola vez saltando la cache.
    -------------------------------------------------------------------------- */
-const VERSION_ESTILOS = 121;
+const VERSION_ESTILOS = 122;
 
 (function comprobarVersionDeEstilos() {
   const leida = Number(
@@ -1639,9 +1639,19 @@ function renderMainWeatherMap() {
     }).addTo(mainMap);
     mainMapLayerGroup = L.layerGroup().addTo(mainMap);
 
-    const bounds = state.stations.filter((s) => s.latitude && s.longitude).map((s) => [s.latitude, s.longitude]);
-    if (bounds.length) {
-      mainMap.fitBounds(bounds, { padding: [50, 50] });
+    /* En pantallas pequenas el mapa arranca centrado en la estacion activa,
+       que es lo que hace el boton "Centrar activa": encuadrar toda la red
+       deja los marcadores diminutos y lejos. En escritorio sigue viendose
+       la red completa. */
+    const esPantallaPequena = window.matchMedia('(max-width: 768px)').matches;
+    const activa = currentStation();
+    if (esPantallaPequena && activa && activa.latitude && activa.longitude) {
+      mainMap.setView([activa.latitude, activa.longitude], 13);
+    } else {
+      const bounds = state.stations.filter((s) => s.latitude && s.longitude).map((s) => [s.latitude, s.longitude]);
+      if (bounds.length) {
+        mainMap.fitBounds(bounds, { padding: [50, 50] });
+      }
     }
   } else if (mainMapTileLayer && mainMapTileLayer._url !== tileCfg.url) {
     mainMap.removeLayer(mainMapTileLayer);
