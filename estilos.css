@@ -2,7 +2,7 @@
 :root {
   /* Debe coincidir con VERSION_ESTILOS en app.js. Si el navegador sirve una
      hoja vieja de la cache, la aplicacion lo detecta y recarga una vez. */
-  --version-estilos: 128;
+  --version-estilos: 129;
   --bg: #f7f8f5; --superficie: #ffffff; --superficie2: #f0f2ec; --borde: #e1e5db;
   --texto: #17220f; --texto2: #55604a; --texto3: #7f8a73;
   --g1: #1e6b14; --g2: #2e8a1f; --g3: #4aab30; --g4: #72c255; --g6: #e2f2da;
@@ -75,6 +75,20 @@ input[type="date"].input-like {
   accent-color: #111111;
   color-scheme: light;
   font-variant-numeric: tabular-nums;
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+input[type="date"].entrada::-webkit-date-and-time-value,
+input[type="date"].sm-input::-webkit-date-and-time-value,
+input[type="date"].input-like::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
 }
 
 .entrada, .selector, textarea.entrada { height: 38px; padding: 0 11px; border: 1px solid var(--borde); border-radius: 8px; font-size: var(--fs-md); font-family: inherit; background: var(--superficie2); color: var(--texto); outline: none; max-width: 100%; width: 100%; }
@@ -229,6 +243,7 @@ button.barra:hover .etq { color: var(--g1); text-decoration: underline; }
 /* ---------- textos ---------- */
 .filtros { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--r); padding: 12px 14px; margin-bottom: 16px; }
 .filtros .selector, .filtros .entrada { width: auto; min-width: 150px; }
+.filtros input[type="date"].entrada { display: inline-block; width: auto; }
 .filtros .entrada.buscar { flex: 1; min-width: 200px; }
 @media (max-width: 1050px) { }
 .tx-lado .tarjeta { padding: 14px 16px; }
@@ -1263,26 +1278,15 @@ a.fv-chip-miembro:hover .fv-ico-in {
   font-size: 9px;
 }
 
-/* ---------- Tarjetas de Variables Reales de las Estaciones (Compactas en altura) ---------- */
+/* ---------- Tarjetas de Variables Reales de las Estaciones (Linea Grafica UTM) ---------- */
 .mediciones-actuales {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 8px;
-  padding: 9px;
+  gap: 10px;
+  padding: 0;
   margin-bottom: 12px;
-  border-radius: var(--r);
-  /* Mismo tratamiento que el observatorio original: panel verde oscuro con
-     las fichas translucidas encima. Alli el fondo es una foto de pinos de
-     3.2 MB; si se guarda como assets/images/fondo-pinos.jpg se usa, y si no
-     queda el degradado, que pesa cero. */
-  /* La foto del observatorio original, reducida de 5760x7428 y 3.2 MB a
-     1400x470 y 88 KB: va detras de fichas semitransparentes, el detalle no
-     se aprecia. El degradado queda debajo por si la imagen no carga. */
-  background-image: url('assets/images/fondo-pinos.jpg'),
-    linear-gradient(140deg, #123f0d 0%, #1e6b14 48%, #2f7a1d 100%);
-  background-size: cover;
-  background-position: center;
-  box-shadow: var(--sombra);
+  background: transparent;
+  box-shadow: none;
 }
 
 .recuadro-variable {
@@ -1292,26 +1296,17 @@ a.fv-chip-miembro:hover .fv-ico-in {
   justify-content: space-between;
   width: 100%;
   height: 124px;
-  border-radius: 14px;
+  border-radius: var(--r);
   position: relative;
-  padding: 7px 8px 8px;
-  /* Fondo transparente para efecto cristal liquido puro sobre el fondo */
-  background: transparent !important;
-  color: #ffffff;
+  padding: 10px 10px 9px;
+  background: var(--superficie) !important;
+  color: var(--texto);
   text-align: center;
   font-family: 'Montserrat', sans-serif;
-  /* Efecto cristal: el borde claro y el brillo interior superior simulan
-     el canto de una lamina, y el desenfoque del fondo da el grosor. El
-     navegador que no soporte backdrop-filter se queda con el color
-     translucido, que ya funciona por si solo. */
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-top-color: rgba(255, 255, 255, 0.38);
-  -webkit-backdrop-filter: blur(7px) saturate(125%);
-  backdrop-filter: blur(7px) saturate(125%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
-    0 4px 14px rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--borde);
+  box-shadow: var(--sombra);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 .rv-cab {
@@ -1321,23 +1316,23 @@ a.fv-chip-miembro:hover .fv-ico-in {
   gap: 6px;
 }
 
-/* Los PNG de estas variables son siluetas blancas, invisibles sobre fondo
-   claro. Se usan como mascara y el color lo pone el CSS. */
+/* Los PNG de estas variables son siluetas blancas. Se usan como mascara y
+   toman el verde institucional (--g1) sobre el fondo blanco de cada ficha. */
 .rv-icono {
-  width: 33px;
-  height: 33px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
-  background-color: #ffffff;
+  background-color: var(--g1);
   -webkit-mask: var(--icono) center / contain no-repeat;
   mask: var(--icono) center / contain no-repeat;
 }
 
 .rv-titulo {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   text-align: left;
-  line-height: 1.1;
-  color: #ffffff;
+  line-height: 1.15;
+  color: var(--texto2);
   font-family: 'Montserrat', sans-serif;
 }
 
@@ -1355,8 +1350,8 @@ a.fv-chip-miembro:hover .fv-ico-in {
   font-weight: 700;
   font-size: 17px;
   line-height: 1.1;
-  color: #ffffff;
-  margin-bottom: 4px;
+  color: var(--texto);
+  margin-bottom: 5px;
 }
 
 .rv-valor-med {
@@ -1364,14 +1359,14 @@ a.fv-chip-miembro:hover .fv-ico-in {
   font-weight: 700;
   font-size: 15px;
   line-height: 1.1;
-  color: #ffffff;
-  margin-bottom: 2px;
+  color: var(--texto);
+  margin-bottom: 3px;
 }
 
 .rv-barra-pista {
-  width: 84%;
+  width: 86%;
   height: 6px;
-  background: rgba(255, 255, 255, 0.28);
+  background: #e4ebe0;
   border-radius: 999px;
   overflow: hidden;
 }
@@ -1379,19 +1374,19 @@ a.fv-chip-miembro:hover .fv-ico-in {
 .rv-barra-humedad {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #38bdf8, #2563eb);
+  background: linear-gradient(90deg, var(--g2), var(--g4));
 }
 
 .rv-barra-lluvia {
   height: 100%;
   border-radius: 999px;
-  background: #60a5fa;
+  background: linear-gradient(90deg, var(--g1), var(--g3));
 }
 
 .rv-subtexto {
   font-family: 'Montserrat', sans-serif;
-  font-size: 10px;
-  color: #ffffff;
+  font-size: 10.5px;
+  color: var(--texto2);
   text-align: center;
   line-height: 1.15;
   font-weight: 500;
@@ -1428,7 +1423,8 @@ a.fv-chip-miembro:hover .fv-ico-in {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  border: 1.5px solid #cfe0c8;
+  background: #f6faf4;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1439,11 +1435,11 @@ a.fv-chip-miembro:hover .fv-ico-in {
   position: absolute;
   font-size: 8px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--texto2);
   line-height: 1;
 }
 
-.rv-dir.rv-n { top: 2px; }
+.rv-dir.rv-n { top: 2px; color: var(--g1); }
 .rv-dir.rv-s { bottom: 2px; }
 .rv-dir.rv-o { left: 3px; }
 .rv-dir.rv-e { right: 3px; }
@@ -1453,22 +1449,22 @@ a.fv-chip-miembro:hover .fv-ico-in {
   width: 34px;
   height: 34px;
   transform-origin: 50% 50%;
-  color: #ff8c1a;
+  color: var(--g1);
   transition: transform .35s ease;
 }
 
 /* Sin viento medido la aguja no apunta a ninguna parte */
 .rv-brujula.sin-viento .rv-aguja {
-  color: rgba(255, 255, 255, .35);
+  color: #b8c4b0;
 }
 
-/* Barra arcoíris de Índice UV (compacta) */
+/* Barra institucional de Índice UV (escala verde a dorado institucional) */
 .rv-uv-pista {
-  width: 84%;
+  width: 86%;
   height: 6px;
   border-radius: 999px;
   position: relative;
-  background: linear-gradient(to right, green, yellow, orange, red, purple);
+  background: linear-gradient(90deg, #2e8a1f 0%, #72c255 34%, #d4a80a 70%, #b87908 100%);
   margin-top: 4px;
   margin-bottom: 3px;
 }
@@ -1479,14 +1475,15 @@ a.fv-chip-miembro:hover .fv-ico-in {
   width: 18px;
   height: 18px;
   background: #ffffff;
+  border: 1.5px solid var(--g1);
   border-radius: 50%;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 3px rgba(20, 40, 10, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 10px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--texto);
   transform: translateX(-50%);
 }
 
@@ -2660,18 +2657,18 @@ a.fv-chip-miembro:hover .fv-ico-in {
   }
   .mediciones-actuales {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
-    padding: 7px;
+    gap: 8px;
+    padding: 0;
     margin-bottom: 10px;
   }
   .recuadro-variable {
-    height: 110px;
-    padding: 6px 6px 6px;
+    height: 112px;
+    padding: 8px 7px 7px;
     border-radius: 10px;
   }
   .rv-icono {
-    width: 27px;
-    height: 27px;
+    width: 24px;
+    height: 24px;
   }
   .rv-titulo {
     font-size: 11.5px;
@@ -2796,6 +2793,9 @@ a.fv-chip-miembro:hover .fv-ico-in {
   border: 1px solid #e3ebe0;
   border-radius: 12px;
   padding: 16px 18px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /* Mismo tratamiento que .titulo-tarjeta del resto de paginas
@@ -2836,9 +2836,11 @@ a.fv-chip-miembro:hover .fv-ico-in {
 }
 
 .sm-campo {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 5px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .sm-campo label {
@@ -3194,20 +3196,32 @@ a.fv-chip-miembro:hover .fv-ico-in {
     padding: 16px 14px 20px;
     margin-top: 8px;
   }
+  .sm-bloque {
+    padding: 14px 12px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
   .sm-grid-2,
   .sm-chips-estaciones {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
   }
   .sm-grid-2 {
     gap: 12px !important;
     width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
   }
   .sm-campo {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     width: 100% !important;
+    max-width: 100% !important;
     min-width: 0 !important;
   }
   .sm-input[type="date"],
   .sm-input {
+    display: block !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
@@ -4885,22 +4899,30 @@ button[data-edit-station]:active {
 
   #historyFilters {
     width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    max-width: 100%;
+    min-width: 0;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 10px;
     padding: 12px;
     box-sizing: border-box;
+    overflow: hidden;
   }
 
   #historyFilters .nota {
-    display: flex;
-    flex-direction: column;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 4px;
     font-size: 11.5px;
+    min-width: 0;
+    max-width: 100%;
   }
 
   #historyFilters .entrada {
+    display: block !important;
     width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     box-sizing: border-box;
     font-size: 12px;
     padding: 6px 8px;

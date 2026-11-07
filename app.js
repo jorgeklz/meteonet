@@ -155,7 +155,7 @@ function formatTemp(valor) {
    La hoja declara `--version-estilos`; si no coincide con esta constante, se
    recarga una sola vez saltando la cache.
    -------------------------------------------------------------------------- */
-const VERSION_ESTILOS = 128;
+const VERSION_ESTILOS = 129;
 
 (function comprobarVersionDeEstilos() {
   const leida = Number(
@@ -1213,7 +1213,7 @@ function renderDashboard() {
 
   const solarVal = station.radiation == null ? null : Math.round(Number(station.radiation));
   const solarWidth = solarVal == null ? 0 : Math.min(100, Math.max(0, (solarVal / 1200) * 100));
-  const solarColor = solarVal < 200 ? '#ffecb3' : solarVal < 600 ? '#ffb74d' : solarVal < 900 ? '#ff7043' : '#f44336';
+  const solarColor = solarVal < 200 ? '#e5c130' : solarVal < 600 ? '#d4a80a' : solarVal < 900 ? '#c49108' : '#a87405';
   const solarText = solarVal == null ? '' : obtenerTextoRadiacion(solarVal);
 
   const uvVal = station.uvIndex != null && station.uvIndex !== -1 ? Number(station.uvIndex) : null;
@@ -1225,7 +1225,7 @@ function renderDashboard() {
     <!-- 1. Humedad -->
     <article class="recuadro-variable">
       <div class="rv-cab">
-        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/humedad.png');-webkit-mask:url('assets/images/humedad.png') center/contain no-repeat;mask:url('assets/images/humedad.png') center/contain no-repeat;background-color:#ffffff"></span>
+        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/humedad.png');-webkit-mask:url('assets/images/humedad.png') center/contain no-repeat;mask:url('assets/images/humedad.png') center/contain no-repeat"></span>
         <span class="rv-titulo">Humedad</span>
       </div>
       <div class="rv-cuerpo">
@@ -1239,7 +1239,7 @@ function renderDashboard() {
     <!-- 2. Precipitación -->
     <article class="recuadro-variable">
       <div class="rv-cab">
-        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/precipitacion.png');-webkit-mask:url('assets/images/precipitacion.png') center/contain no-repeat;mask:url('assets/images/precipitacion.png') center/contain no-repeat;background-color:#ffffff"></span>
+        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/precipitacion.png');-webkit-mask:url('assets/images/precipitacion.png') center/contain no-repeat;mask:url('assets/images/precipitacion.png') center/contain no-repeat"></span>
         <span class="rv-titulo">Precipitación</span>
       </div>
       <div class="rv-cuerpo">
@@ -1254,7 +1254,7 @@ function renderDashboard() {
     <!-- 3. Presión atmosférica -->
     <article class="recuadro-variable">
       <div class="rv-cab">
-        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/presion-atmosferica.png');-webkit-mask:url('assets/images/presion-atmosferica.png') center/contain no-repeat;mask:url('assets/images/presion-atmosferica.png') center/contain no-repeat;background-color:#ffffff"></span>
+        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/presion-atmosferica.png');-webkit-mask:url('assets/images/presion-atmosferica.png') center/contain no-repeat;mask:url('assets/images/presion-atmosferica.png') center/contain no-repeat"></span>
         <span class="rv-titulo">Presión atmosférica</span>
       </div>
       <div class="rv-cuerpo">
@@ -1262,13 +1262,13 @@ function renderDashboard() {
       </div>
       <div class="rv-gauge-wrap">
         <svg viewBox="0 0 100 60" class="rv-gauge-svg">
-          <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="6"></path>
-          <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#ff8c1a" stroke-width="6" stroke-linecap="round"
+          <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e4ebe0" stroke-width="6"></path>
+          <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#2e8a1f" stroke-width="6" stroke-linecap="round"
             pathLength="100" stroke-dasharray="${(((pressAngle + 90) / 180) * 100).toFixed(1)} 100"></path>
-          <line x1="50" y1="50" x2="50" y2="14" stroke="#ff8c1a" stroke-width="3.2" stroke-linecap="round" transform="rotate(${pressAngle.toFixed(1)} 50 50)"></line>
-          <circle cx="50" cy="50" r="3.2" fill="#ff8c1a"></circle>
-          <text x="0" y="58" font-size="8" fill="#ffffff">Baja</text>
-          <text x="82" y="58" font-size="8" fill="#ffffff">Alta</text>
+          <line x1="50" y1="50" x2="50" y2="14" stroke="#1e6b14" stroke-width="3.2" stroke-linecap="round" transform="rotate(${pressAngle.toFixed(1)} 50 50)"></line>
+          <circle cx="50" cy="50" r="3.2" fill="#1e6b14"></circle>
+          <text x="0" y="58" font-size="8" font-weight="600" fill="#55604a">Baja</text>
+          <text x="82" y="58" font-size="8" font-weight="600" fill="#55604a">Alta</text>
         </svg>
       </div>
     </article>
@@ -1276,7 +1276,7 @@ function renderDashboard() {
     <!-- 4. Velocidad del viento -->
     <article class="recuadro-variable">
       <div class="rv-cab">
-        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/velocidad-viento.png');-webkit-mask:url('assets/images/velocidad-viento.png') center/contain no-repeat;mask:url('assets/images/velocidad-viento.png') center/contain no-repeat;background-color:#ffffff"></span>
+        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/velocidad-viento.png');-webkit-mask:url('assets/images/velocidad-viento.png') center/contain no-repeat;mask:url('assets/images/velocidad-viento.png') center/contain no-repeat"></span>
         <span class="rv-titulo">Velocidad del viento</span>
       </div>
       <div class="rv-cuerpo">
@@ -1301,7 +1301,7 @@ function renderDashboard() {
     <!-- 5. Radiación solar -->
     <article class="recuadro-variable">
       <div class="rv-cab">
-        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/radiacion.png');-webkit-mask:url('assets/images/radiacion.png') center/contain no-repeat;mask:url('assets/images/radiacion.png') center/contain no-repeat;background-color:#ffffff"></span>
+        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/radiacion.png');-webkit-mask:url('assets/images/radiacion.png') center/contain no-repeat;mask:url('assets/images/radiacion.png') center/contain no-repeat"></span>
         <span class="rv-titulo">Radiación solar</span>
       </div>
       <div class="rv-cuerpo">
@@ -1316,7 +1316,7 @@ function renderDashboard() {
     <!-- 6. Índice UV -->
     <article class="recuadro-variable">
       <div class="rv-cab">
-        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/uv.png');-webkit-mask:url('assets/images/uv.png') center/contain no-repeat;mask:url('assets/images/uv.png') center/contain no-repeat;background-color:#ffffff"></span>
+        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/uv.png');-webkit-mask:url('assets/images/uv.png') center/contain no-repeat;mask:url('assets/images/uv.png') center/contain no-repeat"></span>
         <span class="rv-titulo">Índice UV</span>
       </div>
       <div class="rv-cuerpo">

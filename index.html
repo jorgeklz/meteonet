@@ -13,7 +13,7 @@
     href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="vendor/leaflet.css" />
-  <link rel="stylesheet" href="estilos.css?v=128" />
+  <link rel="stylesheet" href="estilos.css?v=129" />
   <link rel="stylesheet" href="visitas.css?v=4" />
 </head>
 
@@ -644,8 +644,8 @@
             <div
               style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
               <form class="filtros" id="historyFilters" style="margin-bottom:0;">
-                <label class="nota">Desde <input class="entrada" type="date" id="dateFrom" style="width:auto" /></label>
-                <label class="nota">Hasta <input class="entrada" type="date" id="dateTo" style="width:auto" /></label>
+                <label class="nota">Desde <input class="entrada" type="date" id="dateFrom" /></label>
+                <label class="nota">Hasta <input class="entrada" type="date" id="dateTo" /></label>
                 <button class="boton" type="submit">Filtrar</button>
               </form>
               <button class="boton secundario" id="exportCsvButton" type="button">↓ Exportar CSV</button>
@@ -1040,7 +1040,7 @@
     <!-- Configuracion de integracion: unico archivo a editar para conectar
          la API de estaciones, el historico, las solicitudes y el modelo. -->
     <script src="config.js?v=4"></script>
-    <script src="app.js?v=117"></script>
+    <script src="app.js?v=118"></script>
     <script src="visitas.js?v=5"></script>
   </body>
 </html>
