@@ -1,0 +1,1041 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1e6b14" />
+  <title>UTM MeteoNet · Observatorio Meteorológico</title>
+  <link rel="icon" href="assets/logo_utm_2022.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="vendor/leaflet.css" />
+  <link rel="stylesheet" href="estilos.css?v=106" />
+</head>
+
+<body>
+  <div class="sitio-web" id="appLayoutWrapper">
+    <!-- Cabecera oficial de UTM MeteoNet con botón de 3 rayas, ambos logos y cintillo degradado -->
+    <header class="web-header no-imprimir">
+      <div class="topbar-meteonet">
+        <div class="topbar-meteonet-inner">
+          <div class="topbar-left-group">
+            <a href="#inicio" data-page-link="inicio" class="topbar-brand-left">
+              <img src="assets/images/logo_meteonet.png" alt="UTM MeteoNet" class="topbar-logo-meteonet" />
+            </a>
+          </div>
+          <div class="topbar-brand-right">
+            <img src="assets/images/logo_gota.png" alt="Logo Gota MeteoNet" class="topbar-logo-gota" />
+          </div>
+        </div>
+      </div>
+
+      <div class="subbar-navegacion">
+        <div class="subbar-navegacion-inner">
+          <nav class="web-nav" aria-label="Navegación principal">
+            <button class="web-nav-link activo" data-page="inicio" type="button" title="Inicio" aria-label="Inicio">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1V9.5z" />
+              </svg>
+              <span>Inicio</span>
+            </button>
+            <button class="web-nav-link" data-page="solicitar-datos" type="button" title="Solicitar datos"
+              aria-label="Solicitar datos">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="12" y1="18" x2="12" y2="12" />
+                <polyline points="9 15 12 18 15 15" />
+              </svg>
+              <span>Solicitar datos</span>
+            </button>
+          </nav>
+
+          <div class="web-actions">
+            <button type="button" class="btn-info-icono nav-utilidad" id="accessButton"
+              aria-label="Acceso administrador" title="Acceso administrador">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                <polyline points="10 17 15 12 10 7" />
+                <line x1="15" y1="12" x2="3" y2="12" />
+              </svg>
+              <span class="nav-ico-txt">Acceso</span>
+            </button>
+            <div class="admin-menu-wrap" id="adminMenuWrap" hidden>
+              <button type="button" class="btn-info-icono nav-utilidad nav-admin-btn" id="adminMenuBtn"
+                aria-haspopup="true" aria-expanded="false" title="Administración">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <polyline points="9 12 11 14 15 10" />
+                </svg>
+                <span class="nav-ico-txt">Administración</span>
+                <span class="nav-caret" aria-hidden="true">▾</span>
+                <span class="insignia mal nav-admin-badge" id="adminMenuBadge" hidden>0</span>
+              </button>
+              <div class="admin-menu-panel" id="adminMenuPanel" role="menu" hidden>
+                <div class="amp-cab">
+                  <span class="amp-cab-lbl">Sesión activa</span>
+                  <b id="adminStatusBadge">Administrador</b>
+                </div>
+                <div class="amp-lista">
+                  <button class="web-nav-link admin-only-nav" data-page="estaciones" type="button" title="Estaciones"
+                    aria-label="Estaciones" hidden>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z" />
+                      <circle cx="12" cy="9" r="2.5" />
+                    </svg>
+                    <span>Estaciones</span>
+                  </button>
+                  <button class="web-nav-link admin-only-nav" data-page="historico" type="button" title="Histórico"
+                    aria-label="Histórico" hidden>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="9" />
+                      <polyline points="12 7 12 12 15.5 14" />
+                    </svg>
+                    <span>Histórico</span>
+                  </button>
+                  <button class="web-nav-link admin-only-nav" data-page="alertas" type="button" title="Alertas"
+                    aria-label="Alertas" hidden>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                    <span>Alertas</span>
+                    <span class="insignia mal" id="navAlertBadge" hidden style="padding:1px 6px">0</span>
+                  </button>
+                  <button class="web-nav-link admin-only-nav" data-page="reportes" type="button" title="Boletín IA"
+                    aria-label="Boletín IA" hidden>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z" />
+                    </svg>
+                    <span>Boletín IA</span>
+                  </button>
+                  <button class="web-nav-link admin-only-nav" data-page="usuarios" type="button" title="Usuarios"
+                    aria-label="Usuarios" hidden>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                    </svg>
+                    <span>Usuarios</span>
+                  </button>
+                  <button class="web-nav-link admin-only-nav" data-page="configuracion" type="button"
+                    title="Configuración" aria-label="Configuración" hidden>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="3" />
+                      <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.08a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.08a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                    <span>Configuración</span>
+                  </button>
+                </div>
+                <div class="amp-pie">
+                  <button class="amp-salir" id="adminLogoutButton" type="button">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                      <polyline points="16 17 21 12 16 7" />
+                      <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    Cerrar sesión
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Contenedor del contenido principal -->
+    <div class="cuerpo-con-sidebar sidebar-oculto" id="mainLayoutBody">
+
+      <!-- Contenido principal del sitio web -->
+      <main class="web-main">
+        <!-- ==================== VISTA PRINCIPAL: MEDICIÓN ACTUAL Y MAPA ==================== -->
+        <section data-view id="inicio" aria-labelledby="tituloInicio">
+          <h1 class="titulo-oculto" id="tituloInicio">Mediciones actuales de la red UTM MeteoNet</h1>
+
+          <!-- Avisa cuando lo que se ve no proviene del servidor -->
+          <p class="aviso-origen" id="avisoOrigenDatos" role="status" hidden></p>
+
+          <!-- Resumen inicial de la estación con el diseño, tipografía y colores exactos de MeteoNet -->
+          <div class="resumen-estacion-oficial" id="stationHeroSummary" aria-live="polite">
+            <div class="reo-actualizacion">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round" class="reo-act-ico" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"></circle>
+                <polyline points="12 7 12 12 15.5 14"></polyline>
+              </svg>
+              <span class="reo-act-lbl">Última actualización:</span> <span id="heroUpdatedAt">--/--/---- --:--:--</span>
+            </div>
+            <div class="reo-principal">
+              <img id="heroWeatherIcon" src="assets/images/nublado.png" alt="Estado del clima"
+                class="reo-icono-clima" />
+              <div id="heroStationLocation" class="reo-nombre-estacion">Calderón</div>
+              <div class="reo-temperatura">
+                <span id="heroTempValue">25</span> <span class="reo-unidad-grande">°C</span>
+              </div>
+            </div>
+            <div class="reo-condicion" id="heroConditionText">Nublado</div>
+            <div class="reo-sensacion">
+              <span class="reo-etq">Sensación</span> <span id="heroFeelsLike">27</span> <span
+                class="reo-unidad-med">°C</span>
+              <hr class="reo-separador" />
+            </div>
+            <div class="reo-extremos">
+              <span class="reo-etq">Máximo</span> <span id="heroTempMax">31</span><span
+                class="reo-unidad-peq">°C</span> / <span class="reo-etq">Mínimo</span> <span
+                id="heroTempMin">23</span><span class="reo-unidad-peq">°C</span>
+            </div>
+          </div>
+
+          <!-- Medición actual de las variables de la estación seleccionada -->
+          <div class="mediciones-actuales" id="stationMetricsCards" aria-live="polite"></div>
+
+          <!-- Mapa interactivo y estaciones de la red -->
+          <div class="panorama">
+            <div class="tarjeta tarjeta-mapa" style="padding:0;overflow:hidden">
+              <div class="mapa-barra-filtros">
+                <div class="mbf-grupo">
+                  <span class="mbf-etiqueta">Mapa de estaciones meteorológicas</span>
+                </div>
+                <div class="mbf-toggles">
+                  <span class="mbf-conteo" id="mapSummaryBadge">3 estaciones</span>
+                  <button type="button" class="btn-mapa-capas-movil" id="btnMobileMapLayers"
+                    aria-label="Opciones del mapa" title="Opciones del mapa">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                      <polyline points="2 17 12 22 22 17"></polyline>
+                      <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                    <span>Opciones</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="mapa-grande-contenedor">
+                <div class="mapa-grande" id="mainWeatherMap" aria-label="Mapa de estaciones meteorológicas"></div>
+
+                <!-- Tira flotante de estaciones para móvil -->
+                <div class="mapa-estaciones-flotante-movil" id="mobileMapStationStrip"
+                  aria-label="Seleccionar estación en el mapa"></div>
+
+                <!-- Menú bottom-sheet de capas y visualización en móvil -->
+                <div class="mapa-sheet-opciones-movil" id="mobileMapOptionsSheet" hidden>
+                  <div class="mso-grab-bar" aria-hidden="true"></div>
+                  <div class="mso-cabecera">
+                    <span class="mso-titulo">Opciones y capas del mapa</span>
+                    <button type="button" class="mso-cerrar" id="btnMobileCloseMapOptions"
+                      aria-label="Cerrar opciones">×</button>
+                  </div>
+                  <div class="mso-contenido">
+                    <div class="mso-grupo">
+                      <label for="mobileMapBaseLayerSelect" class="mso-label">Estilo de mapa base:</label>
+                      <select id="mobileMapBaseLayerSelect" class="input-like"
+                        style="width:100%;font-size:12px;padding:7px 10px">
+                        <option value="light">Mapa claro</option>
+                        <option value="streets">Mapa de calles y relieve</option>
+                        <option value="satellite">Vista satelital</option>
+                        <option value="topo">Relieve topográfico y terreno</option>
+                      </select>
+                    </div>
+                    <div class="mso-checks">
+                      <label class="chk"><input type="checkbox" id="mAnimacionClima" />Simulación climática
+                        según medición</label>
+                      <label class="chk"><input type="checkbox" id="mEtiquetas" checked />Mostrar nombre de
+                        ubicación</label>
+                      <label class="chk"><input type="checkbox" id="mCodigoEstacion" checked />Mostrar código de
+                        estación</label>
+                      <label class="chk"><input type="checkbox" id="mTemperaturaMapa" />Mostrar temperatura
+                        actual (°C)</label>
+                      <label class="chk"><input type="checkbox" id="mSensacionTermica" />Mostrar sensación térmica
+                        (°C)</label>
+                      <label class="chk"><input type="checkbox" id="mHumedadViento" />Mostrar humedad y viento
+                        actuales</label>
+                      <label class="chk"><input type="checkbox" id="mLluviaMapa" />Mostrar lluvia acumulada (mm)</label>
+                      <label class="chk"><input type="checkbox" id="mAlertasMapa" checked />Destacar alertas activas en
+                        el mapa</label>
+                    </div>
+                    <div class="fila-botones fila-botones-mapa mso-acciones"
+                      style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                      <button class="btn-ctrl-mapa" id="mCenterStationBtn" type="button"
+                        title="Centrar mapa en la estación activa">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+                          stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <circle cx="12" cy="12" r="3" />
+                          <circle cx="12" cy="12" r="8" />
+                          <line x1="12" y1="2" x2="12" y2="5" />
+                          <line x1="12" y1="19" x2="12" y2="22" />
+                          <line x1="2" y1="12" x2="5" y2="12" />
+                          <line x1="19" y1="12" x2="22" y2="12" />
+                        </svg>
+                        <span>Centrar activa</span>
+                      </button>
+                      <button class="btn-ctrl-mapa" id="mEncuadreBtn" type="button"
+                        title="Ajustar encuadre a toda la red">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+                          stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                        </svg>
+                        <span>Ver toda la red</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mapa-pie-ahora" style="padding:8px 14px;border-top:1px solid var(--borde)">
+                <span class="nota">Haz clic en el icono de cualquier estación en el mapa para ver su ficha de mediciones
+                  actuales.</span>
+              </div>
+            </div>
+
+            <!-- Panel lateral de estaciones y acciones del mapa -->
+            <aside class="tarjeta controles">
+              <section>
+                <div class="panel-estaciones-cabecera">
+                  <div class="titulo-tarjeta">
+                    <span>Estaciones</span>
+                    <span class="nota" id="stationsTotalNote"></span>
+                  </div>
+                  <button type="button" class="btn-buscar-estaciones-panel" id="toggleQuickSearchBtn"
+                    aria-label="Buscar estación" title="Buscar estación">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                  </button>
+                </div>
+                <div class="quick-buscador-wrap" id="quickSearchWrap" hidden>
+                  <input type="text" id="quickStationSearchInput" class="plm-buscador quick-buscador"
+                    placeholder="Buscar estación" autocomplete="off" />
+                </div>
+                <div id="mapStationQuickList" style="display:grid;gap:6px"></div>
+                <div class="quick-paginador" id="quickStationPager" hidden></div>
+              </section>
+
+              <section>
+                <div class="titulo-tarjeta">Opciones del mapa</div>
+                <div class="opciones-mapa-lista">
+                  <label class="chk"><input type="checkbox" id="cAnimacionClima" />Simulación climática según
+                    medición</label>
+                  <label class="chk"><input type="checkbox" id="cEtiquetas" checked />Mostrar nombre de
+                    ubicación</label>
+                  <label class="chk"><input type="checkbox" id="cCodigoEstacion" checked />Mostrar código de
+                    estación</label>
+                  <label class="chk"><input type="checkbox" id="cTemperaturaMapa" />Mostrar temperatura actual
+                    (°C)</label>
+                  <label class="chk"><input type="checkbox" id="cSensacionTermica" />Mostrar sensación térmica
+                    (°C)</label>
+                  <label class="chk"><input type="checkbox" id="cHumedadViento" />Mostrar humedad y viento
+                    actuales</label>
+                  <label class="chk"><input type="checkbox" id="cLluviaMapa" />Mostrar lluvia acumulada (mm)</label>
+                  <label class="chk"><input type="checkbox" id="cAlertasMapa" checked />Destacar alertas activas en el
+                    mapa</label>
+                </div>
+                <div class="opciones-mapa-base">
+                  <label for="mapBaseLayerSelect" class="omb-label">Estilo de mapa base:</label>
+                  <div class="selector-mapa-wrap">
+                    <select id="mapBaseLayerSelect" class="selector-mapa-base" style="width:100%">
+                      <option value="light" selected>Mapa claro</option>
+                      <option value="streets">Mapa de calles y relieve</option>
+                      <option value="satellite">Vista satelital</option>
+                      <option value="topo">Relieve topográfico y terreno</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="fila-botones fila-botones-mapa" style="margin-top:12px">
+                  <button class="btn-ctrl-mapa" id="miUbicacionBtn" type="button"
+                    title="Seleccionar la estación más cercana a mi ubicación">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z" />
+                      <circle cx="12" cy="10" r="2.6" />
+                    </svg>
+                    <span>Mi ubicación</span>
+                  </button>
+                  <button class="btn-ctrl-mapa" id="centerStationBtn" type="button"
+                    title="Centrar mapa en la estación activa">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="3" />
+                      <circle cx="12" cy="12" r="8" />
+                      <line x1="12" y1="2" x2="12" y2="5" />
+                      <line x1="12" y1="19" x2="12" y2="22" />
+                      <line x1="2" y1="12" x2="5" y2="12" />
+                      <line x1="19" y1="12" x2="22" y2="12" />
+                    </svg>
+                    <span>Centrar activa</span>
+                  </button>
+                  <button class="btn-ctrl-mapa" id="bEncuadre" type="button" title="Ajustar encuadre a toda la red">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                    </svg>
+                    <span>Ver toda la red</span>
+                  </button>
+                  <button class="btn-ctrl-mapa btn-ctrl-recargar" id="bRecargarLectura" type="button"
+                    title="Sincronizar mediciones oficiales en tiempo real">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-1.19" />
+                    </svg>
+                    <span>Actualizar lecturas</span>
+                  </button>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ==================== VISTA: SOLICITAR DATOS (Línea gráfica MeteoNet y UX mejorada) ==================== -->
+        <section data-view id="solicitar-datos" hidden>
+          <div class="solicitud-meteonet-card">
+            <div class="sm-cabecera">
+              <div>
+                <h1 class="sm-titulo-principal">Formulario de solicitud de datos meteorológicos</h1>
+                <p class="sm-subtitulo">
+                  Solicite datos meteorológicos históricos de manera rápida completando el formulario a continuación:
+                </p>
+              </div>
+              <button class="btn-ctrl-mapa sm-btn-volver" id="closeDataRequestButton" type="button"
+                title="Volver al mapa principal">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Volver al mapa</span>
+              </button>
+            </div>
+
+            <form id="dataRequestForm" class="sm-formulario">
+              <!-- Bloque 1: Datos personales -->
+              <div class="sm-bloque">
+                <h2 class="sm-seccion-titulo">
+                  <span class="sm-paso-num">1</span>
+                  Datos personales:
+                </h2>
+                <div class="sm-grid-2">
+                  <div class="sm-campo">
+                    <label for="reqDocument">Número de documento de identificación: <span
+                        class="sm-req">*</span></label>
+                    <input id="reqDocument" class="sm-input" name="document" type="tel" placeholder="Ej. 1312345678"
+                      required autocomplete="off" />
+                  </div>
+                  <div class="sm-campo">
+                    <label for="reqFullName">Nombres y apellidos completos: <span class="sm-req">*</span></label>
+                    <input id="reqFullName" class="sm-input" name="fullName" type="text"
+                      placeholder="Ej. María Fernanda Mendoza" required autocomplete="name" />
+                  </div>
+                </div>
+
+                <div class="sm-grid-2" style="margin-bottom:0">
+                  <div class="sm-campo">
+                    <label for="reqInstitution">Institución: <span class="sm-req">*</span></label>
+                    <input id="reqInstitution" class="sm-input" name="institution" type="text"
+                      placeholder="Ej. Universidad Técnica de Manabí" required />
+                  </div>
+                  <div class="sm-campo">
+                    <label for="reqEmail">Correo electrónico: <span class="sm-req">*</span></label>
+                    <input id="reqEmail" class="sm-input" name="email" type="email" placeholder="nombre@utm.edu.ec"
+                      required autocomplete="email" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bloque 2: Detalles de la solicitud (con chips interactivos de estaciones y variables) -->
+              <div class="sm-bloque">
+                <h2 class="sm-seccion-titulo">
+                  <span class="sm-paso-num">2</span>
+                  Detalles de la solicitud:
+                </h2>
+
+                <div class="sm-campo">
+                  <div class="sm-label-fila">
+                    <label>Seleccione estación meteorológica: <span class="sm-req">*</span></label>
+                    <span class="sm-ayuda-chip">Haz clic para elegir estación</span>
+                  </div>
+                  <div class="sm-chips-estaciones" id="requestStationChips" role="radiogroup"
+                    aria-label="Seleccione estación meteorológica"></div>
+                  <!-- Select sincronizado para compatibilidad del formulario -->
+                  <select class="selector" name="station" id="requestStation" required hidden></select>
+                </div>
+
+                <div class="sm-campo" style="margin-top:14px">
+                  <div class="sm-label-fila">
+                    <label>Variables requeridas: <span class="sm-req">*</span></label>
+                    <button type="button" class="sm-btn-todas" id="toggleAllVarsBtn">Seleccionar todas</button>
+                  </div>
+                  <div class="sm-chips-variables" id="requestVariableChips" role="group"
+                    aria-label="Variables meteorológicas requeridas">
+                    <button type="button" class="sm-var-chip" data-var-chip="temperature">
+                      <span class="sm-var-check" aria-hidden="true">✓</span>
+                      <span>Temperatura</span>
+                    </button>
+                    <button type="button" class="sm-var-chip" data-var-chip="humidity">
+                      <span class="sm-var-check" aria-hidden="true">✓</span>
+                      <span>Humedad</span>
+                    </button>
+                    <button type="button" class="sm-var-chip" data-var-chip="precipitation">
+                      <span class="sm-var-check" aria-hidden="true">✓</span>
+                      <span>Precipitación</span>
+                    </button>
+                    <button type="button" class="sm-var-chip" data-var-chip="pressure">
+                      <span class="sm-var-check" aria-hidden="true">✓</span>
+                      <span>Presión atmosférica</span>
+                    </button>
+                    <button type="button" class="sm-var-chip" data-var-chip="windSpeed">
+                      <span class="sm-var-check" aria-hidden="true">✓</span>
+                      <span>Velocidad del viento</span>
+                    </button>
+                    <button type="button" class="sm-var-chip" data-var-chip="radiation">
+                      <span class="sm-var-check" aria-hidden="true">✓</span>
+                      <span>Radiación solar</span>
+                    </button>
+                    <button type="button" class="sm-var-chip" data-var-chip="uvIndex">
+                      <span class="sm-var-check" aria-hidden="true">✓</span>
+                      <span>Índice UV</span>
+                    </button>
+                  </div>
+                  <select class="selector" name="variables" id="requestVariables" multiple required hidden>
+                    <option value="all">Todas las variables</option>
+                    <option value="temperature">Temperatura</option>
+                    <option value="humidity">Humedad</option>
+                    <option value="precipitation">Precipitación</option>
+                    <option value="pressure">Presión atmosférica</option>
+                    <option value="windSpeed">Velocidad del viento</option>
+                    <option value="radiation">Radiación solar</option>
+                    <option value="uvIndex">Índice UV</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Bloque 3: Periodo de tiempo y motivo -->
+              <div class="sm-bloque">
+                <div class="sm-label-fila" style="margin-bottom:10px">
+                  <h2 class="sm-seccion-titulo" style="margin-bottom:0">
+                    <span class="sm-paso-num">3</span>
+                    Periodo de tiempo:
+                  </h2>
+                  <div class="sm-presets-fecha">
+                    <button type="button" class="sm-preset-btn" data-date-preset="7">Últimos 7 días</button>
+                    <button type="button" class="sm-preset-btn" data-date-preset="30">Último mes</button>
+                    <button type="button" class="sm-preset-btn" data-date-preset="90">Últimos 3 meses</button>
+                  </div>
+                </div>
+
+                <div class="sm-grid-2">
+                  <div class="sm-campo">
+                    <label for="reqStartDate">Fecha de inicio: <span class="sm-req">*</span></label>
+                    <input class="sm-input" name="startDate" id="reqStartDate" type="date" required />
+                  </div>
+                  <div class="sm-campo">
+                    <label for="reqEndDate">Fecha de término: <span class="sm-req">*</span></label>
+                    <input class="sm-input" name="endDate" id="reqEndDate" type="date" required />
+                  </div>
+                </div>
+
+                <div class="sm-campo" style="margin-top:14px">
+                  <label for="reqPurpose">Motivo o uso de los datos: <span class="sm-req">*</span></label>
+                  <textarea id="reqPurpose" class="sm-input sm-textarea" name="purpose" rows="3"
+                    placeholder="Describa brevemente el proyecto de investigación, tesis o actividad académica..."
+                    required></textarea>
+                </div>
+              </div>
+
+              <!-- Compromiso con interruptor estilo MeteoNet -->
+              <label class="sm-compromiso" for="reqAgreement">
+                <span class="sm-switch">
+                  <input id="reqAgreement" name="agreement" type="checkbox" required />
+                  <span class="sm-slider"></span>
+                </span>
+                <span class="sm-compromiso-texto">
+                  Me comprometo a utilizar los datos únicamente con fines académicos e investigativos. En cualquier
+                  publicación, citaré el uso de los datos procedentes de la herramienta <b>UTM MeteoNet</b> de la
+                  Universidad Técnica de Manabí. <span class="sm-req">*</span>
+                </span>
+              </label>
+
+              <div class="sm-acciones">
+                <button class="sm-boton-gradiente" id="submitRequestBtn" type="submit" disabled>
+                  Enviar solicitud
+                </button>
+                <p class="sm-destino">
+                  La solicitud llega al equipo del observatorio en
+                  <a href="mailto:meteonet@utm.edu.ec">meteonet@utm.edu.ec</a>, que responderá al correo que
+                  indiques.
+                </p>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- ==================== VISTA: ESTACIONES (ADMIN) ==================== -->
+        <section data-view id="estaciones" hidden>
+          <div class="ahora-cab">
+            <div>
+              <h1 class="titulo-pagina">Administración de la red de estaciones</h1>
+              <p class="subtitulo-pagina">Incorpora estaciones a la red y gestiona sus coordenadas, estado operativo y
+                lecturas.</p>
+            </div>
+            <button class="boton" id="addStationButton" type="button">＋ Agregar estación</button>
+          </div>
+
+          <div class="tarjeta">
+            <div class="titulo-tarjeta">Listado de estaciones registradas</div>
+            <div class="tabla-wrap">
+              <table class="tabla">
+                <thead>
+                  <tr>
+                    <th>Estación</th>
+                    <th>Ubicación</th>
+                    <th>Estado</th>
+                    <th class="num">Temperatura</th>
+                    <th class="num">Precipitación</th>
+                    <th class="num">Humedad</th>
+                    <th class="num">Viento</th>
+                    <th class="num">Presión</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="stationComparisonTable"></tbody>
+              </table>
+            </div>
+            <div class="quick-paginador" id="stationsTablePager" style="margin-top:14px"></div>
+          </div>
+        </section>
+
+        <!-- ==================== VISTA: HISTÓRICO (ADMIN) ==================== -->
+        <section data-view id="historico" hidden>
+          <div class="ahora-cab">
+            <div>
+              <h1 class="titulo-pagina">Histórico de mediciones y solicitudes</h1>
+              <p class="subtitulo-pagina">Consulta la serie temporal de la estación seleccionada y gestiona las
+                solicitudes de datos.</p>
+            </div>
+          </div>
+
+          <div class="pestanas" id="historyTabs" style="max-width:420px">
+            <button type="button" data-history-tab="measurements" aria-selected="true">Mediciones</button>
+            <button type="button" data-history-tab="requests" aria-selected="false">Solicitudes de datos</button>
+          </div>
+
+          <div id="historyMeasurementsPanel">
+            <div
+              style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
+              <form class="filtros" id="historyFilters" style="margin-bottom:0;">
+                <label class="nota">Desde <input class="entrada" type="date" id="dateFrom" style="width:auto" /></label>
+                <label class="nota">Hasta <input class="entrada" type="date" id="dateTo" style="width:auto" /></label>
+                <button class="boton" type="submit">Filtrar</button>
+              </form>
+              <button class="boton secundario" id="exportCsvButton" type="button">↓ Exportar CSV</button>
+            </div>
+            <div class="tarjeta">
+              <div class="paginador arriba" id="historyPagerTop"></div>
+              <div class="tabla-wrap">
+                <table class="tabla">
+                  <thead>
+                    <tr>
+                      <th>Fecha y hora</th>
+                      <th class="num">Temperatura</th>
+                      <th class="num">Precipitación</th>
+                      <th class="num">Humedad</th>
+                      <th class="num">Viento</th>
+                      <th class="num">Radiación</th>
+                      <th class="num">Presión</th>
+                    </tr>
+                  </thead>
+                  <tbody id="historyTable"></tbody>
+                </table>
+              </div>
+              <div class="paginador" id="historyPager"></div>
+            </div>
+          </div>
+
+          <div class="tarjeta" id="historyRequestsPanel" hidden>
+            <div class="titulo-tarjeta">Solicitudes recibidas</div>
+            <div class="tabla-wrap">
+              <table class="tabla">
+                <thead>
+                  <tr>
+                    <th>Solicitante</th>
+                    <th>Institución</th>
+                    <th>Estación</th>
+                    <th>Periodo</th>
+                    <th>Variables</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody id="dataRequestsTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VISTA: ALERTAS (ADMIN) ==================== -->
+        <section data-view id="alertas" hidden>
+          <div class="ahora-cab">
+            <div>
+              <h1 class="titulo-pagina">Umbrales y alertas meteorológicas</h1>
+              <p class="subtitulo-pagina">Configura los umbrales de vigilancia para las estaciones de la red.</p>
+            </div>
+            <button class="boton" id="newAlertButton" type="button">＋ Nueva alerta</button>
+          </div>
+
+          <!-- Resumen breve de como operan los umbrales -->
+          <div class="tarjeta tarjeta-explicacion">
+            <p class="exp-texto">
+              Cada regla vigila una variable de la estación. Cuando la lectura cruza el límite que definas, la
+              estación se marca en el mapa y el evento entra en el boletín.
+            </p>
+            <ol class="exp-pasos">
+              <li>Define la variable, el comparador y el límite.</li>
+              <li>El observatorio compara cada lectura entrante.</li>
+              <li>Al cruzarse el límite se levanta la alerta.</li>
+            </ol>
+          </div>
+
+          <div class="dos-col">
+            <div class="tarjeta">
+              <div class="titulo-tarjeta">
+                <span>Estado en la estación actual</span>
+                <span class="nota" id="alertStationNote"></span>
+              </div>
+              <div id="alertList" style="display:grid;gap:8px"></div>
+            </div>
+            <div class="tarjeta">
+              <div class="titulo-tarjeta">
+                <span>Reglas configuradas</span>
+                <span class="nota" id="thresholdCountNote"></span>
+              </div>
+              <div id="thresholdList" style="display:grid;gap:8px"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VISTA: BOLETÍN IA (ADMIN) ==================== -->
+        <section data-view id="reportes" hidden>
+          <div class="no-imprimir">
+            <div class="ahora-cab">
+              <div>
+                <h1 class="titulo-pagina">Boletín meteorológico</h1>
+                <p class="subtitulo-pagina">Convierte los datos de la estación en un boletín técnico, claro y listo para
+                  compartir.</p>
+              </div>
+            </div>
+
+            <div class="report-layout">
+              <aside class="report-controls">
+                <div class="control-block">
+                  <label for="reportStation">Estación</label>
+                  <select class="input-like" id="reportStation"></select>
+                </div>
+
+                <div class="control-block">
+                  <label for="reportRange">Rango de datos</label>
+                  <select class="input-like" id="reportRange">
+                    <option value="ahora">Dato más reciente</option>
+                    <option value="24h">Promedio últimas 24 horas</option>
+                    <option value="semana">Resumen semanal</option>
+                  </select>
+                </div>
+
+                <div class="control-block">
+                  <label>Modelo de IA</label>
+                  <div id="modelList"></div>
+                </div>
+
+                <div class="control-block">
+                  <label>Plantilla del prompt</label>
+                  <div class="prompt-choices" id="promptList"></div>
+                  <textarea id="admCustomPrompt"
+                    style="display:none;width:100%;margin-top:8px;padding:10px;border:1.5px solid var(--borde);border-radius:10px;font:400 12px 'Montserrat',sans-serif;min-height:70px;box-sizing:border-box;">Redacta un boletín climático claro para la comunidad universitaria, con datos actuales, una explicación sencilla y recomendaciones prácticas.</textarea>
+                  <p class="prompt-hint" id="promptPreview"></p>
+                </div>
+
+                <div class="control-block">
+                  <label>Incluir en el boletín</label>
+                  <div class="toggle-row"><span>KPIs e indicadores clave</span><button type="button" class="switch on"
+                      data-toggle="kpisHistoricos" aria-label="Alternar KPIs e indicadores"><i></i></button></div>
+                  <div class="toggle-row"><span>Análisis meteorológico</span><button type="button" class="switch on"
+                      data-toggle="tecnicos" aria-label="Alternar análisis meteorológico"><i></i></button></div>
+                  <div class="toggle-row"><span>Recomendaciones preventivas</span><button type="button"
+                      class="switch on" data-toggle="recomendaciones"
+                      aria-label="Alternar recomendaciones"><i></i></button></div>
+                  <div class="toggle-row"><span>Lluvia acumulada y ciclo horario</span><button type="button"
+                      class="switch on" data-toggle="analisisGrafico"
+                      aria-label="Alternar análisis gráfico del periodo"><i></i></button></div>
+                  <div class="toggle-row"><span>Contexto climatológico mensual</span><button type="button"
+                      class="switch on" data-toggle="lluviaMensual"
+                      aria-label="Alternar contexto climatológico"><i></i></button></div>
+                  <div class="toggle-row"><span>Récords históricos de tormentas</span><button type="button"
+                      class="switch on" data-toggle="tormentasRanking"
+                      aria-label="Alternar récords históricos"><i></i></button></div>
+                </div>
+
+                <button class="generate-button" id="generateButton" type="button"><span>✦</span> Generar boletín</button>
+                <p class="local-note">El procesamiento se simula de forma local</p>
+              </aside>
+
+              <section class="report-preview">
+                <div class="preview-toolbar">
+                  <div class="left">
+                    <div>
+                      <span class="pv-titulo">Vista previa</span>
+                      <small id="statusText">Listo para generar</small>
+                    </div>
+                  </div>
+                  <div class="export-actions">
+                    <button type="button" id="printReportButton" title="Exportar a PDF o imprimir">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                      </svg>
+                      <span>PDF</span>
+                    </button>
+                    <button type="button" class="download-button" id="downloadHtmlButton"
+                      title="Descargar boletín en formato HTML">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                      </svg>
+                      <span>HTML</span>
+                    </button>
+                  </div>
+                </div>
+                <article class="report-document vacio" id="reportDocument">
+                  <div class="doc-vacio">
+                    <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor"
+                      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 3 14 8 19 8" />
+                      <line x1="9" y1="13" x2="15" y2="13" />
+                      <line x1="9" y1="17" x2="13" y2="17" />
+                    </svg>
+                    <p class="doc-vacio-titulo">Aún no hay boletín</p>
+                    <p class="doc-vacio-texto">Elige la estación, el periodo y el tipo de redacción, y presiona
+                      «Generar boletín».</p>
+                  </div>
+                </article>
+              </section>
+            </div>
+
+            <div class="tarjeta" style="margin-top:20px;">
+              <div class="titulo-tarjeta">Historial de esta sesión</div>
+              <div class="tabla-wrap">
+                <table class="tabla" id="reportHistoryTable">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Estación</th>
+                      <th>Modelo</th>
+                      <th>Prompt</th>
+                      <th class="num">Palabras</th>
+                    </tr>
+                  </thead>
+                  <tbody id="historyBody"></tbody>
+                </table>
+              </div>
+              <div class="nota" id="emptyHint" style="padding:14px 0;text-align:center;">Todavía no has generado ningún
+                boletín en esta sesión.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VISTA: USUARIOS (ADMIN) ==================== -->
+        <section data-view id="usuarios" hidden>
+          <div class="ahora-cab">
+            <div>
+              <h1 class="titulo-pagina">Usuarios del sistema</h1>
+              <p class="subtitulo-pagina">Personal autorizado para administrar el observatorio.</p>
+            </div>
+            <button class="boton" id="newUserButton" type="button">＋ Nuevo usuario</button>
+          </div>
+          <div class="tarjeta">
+            <div class="tabla-wrap">
+              <table class="tabla">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Correo institucional</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="usersTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VISTA: CONFIGURACIÓN (ADMIN) ==================== -->
+        <section data-view id="configuracion" hidden>
+          <div class="ahora-cab">
+            <div>
+              <h1 class="titulo-pagina">Configuración</h1>
+              <p class="subtitulo-pagina">Parámetros del administrador y conexión opcional con servicio local de IA.</p>
+            </div>
+          </div>
+          <form class="tarjeta" id="settingsForm" style="max-width:600px">
+            <div class="campo">
+              <label>Nombre visible</label>
+              <input class="entrada" required name="adminName" />
+            </div>
+            <div class="campo">
+              <label>Correo electrónico</label>
+              <input class="entrada" required type="email" name="adminEmail" />
+            </div>
+            <div class="campo">
+              <label for="setIntervalo">Intervalo de lectura de las estaciones</label>
+              <select class="selector" name="intervaloMinutos" id="setIntervalo">
+                <option value="0">Solo al abrir y con el botón Actualizar</option>
+                <option value="1">Cada minuto</option>
+                <option value="5">Cada 5 minutos</option>
+                <option value="10">Cada 10 minutos</option>
+                <option value="15">Cada 15 minutos</option>
+                <option value="30">Cada 30 minutos</option>
+                <option value="60">Cada hora</option>
+              </select>
+              <span class="ayuda">Cada cuánto consulta el sitio a las estaciones y registra la lectura en el
+                histórico. Un intervalo corto da más detalle y más carga sobre el servidor.</span>
+            </div>
+
+            <div class="campo">
+              <label class="chk" for="setUbicacion">
+                <input type="checkbox" name="usarUbicacion" id="setUbicacion" />
+                Seleccionar automáticamente la estación más cercana a quien visita el sitio
+              </label>
+              <span class="ayuda">El navegador pedirá permiso de ubicación a cada visitante. Si lo niega, se
+                abre en la estación por defecto.</span>
+            </div>
+
+            <div class="campo">
+              <label>Modelo de IA</label>
+              <select class="selector" name="aiModel">
+                <option value="gemma-3">Gemma 3</option>
+                <option value="llama-3.3">Llama 3.3</option>
+                <option value="gpt-4o-mini">GPT-4o mini</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label>URL del servicio local de IA (opcional)</label>
+              <input class="entrada" name="apiUrl" type="url" placeholder="http://localhost:8000/api/reports/weather" />
+            </div>
+            <div class="fila-botones">
+              <button class="boton" type="submit">Guardar configuración</button>
+              <button class="boton peligro" id="resetDemoDataButton" type="button">Restaurar datos por defecto</button>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <footer class="web-footer no-imprimir">
+      <div class="web-footer-inner fv-a-inner">
+        <div class="fv-a-bloque-marca">
+          <div class="fv-marca-titulo">
+            <span class="fv-marca-nombre">UTM MeteoNet</span>
+          </div>
+          <p class="fv-marca-desc">Observatorio Meteorológico parte del proyecto de investigación
+            <span class="fv-proyecto-nombre"
+              title="ObservaIA: Observatorios de Datos Multitemáticos con Analítica Avanzada e Inteligencia Artificial">ObservaIA</span>
+            · Universidad Técnica de Manabí</p>
+          <p class="fv-marca-loc">Portoviejo, Manabí, Ecuador © 2026</p>
+        </div>
+
+        <div class="fv-a-bloque-equipo">
+          <div class="fv-equipo-cabecera">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            <span>Equipo de investigación y desarrollo</span>
+          </div>
+          <div class="fv-a-chips-grid">
+            <a href="https://www.linkedin.com/in/jorge-p-470a03302/" target="_blank" rel="noopener noreferrer"
+              class="fv-chip-miembro" title="LinkedIn: Jorge Párraga Álava">
+              <svg class="fv-ico-in" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+                <path
+                  d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9h2.77v8.37H6.46v-8.37M7.84 6.2a1.62 1.62 0 1 0 0 3.24 1.62 1.62 0 0 0 0-3.24z" />
+              </svg>
+              <span>J. Párraga</span>
+            </a>
+            <a href="https://www.linkedin.com/in/edison-leonardo-solorzano-solorzano-13ba8a372/" target="_blank"
+              rel="noopener noreferrer" class="fv-chip-miembro" title="LinkedIn: Edison Solórzano Solórzano">
+              <svg class="fv-ico-in" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+                <path
+                  d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9h2.77v8.37H6.46v-8.37M7.84 6.2a1.62 1.62 0 1 0 0 3.24 1.62 1.62 0 0 0 0-3.24z" />
+              </svg>
+              <span>E. Solórzano</span>
+            </a>
+            <a href="https://www.linkedin.com/in/emilio-jarre-castro-b9758bba/" target="_blank"
+              rel="noopener noreferrer" class="fv-chip-miembro" title="LinkedIn: Emilio Jarre Castro">
+              <svg class="fv-ico-in" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+                <path
+                  d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9h2.77v8.37H6.46v-8.37M7.84 6.2a1.62 1.62 0 1 0 0 3.24 1.62 1.62 0 0 0 0-3.24z" />
+              </svg>
+              <span>E. Jarre</span>
+            </a>
+            <a href="https://www.linkedin.com/in/ezequiel-zamora-ledezma-979b402a/" target="_blank"
+              rel="noopener noreferrer" class="fv-chip-miembro" title="LinkedIn: Ezequiel Zamora Ledezma">
+              <svg class="fv-ico-in" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+                <path
+                  d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9h2.77v8.37H6.46v-8.37M7.84 6.2a1.62 1.62 0 1 0 0 3.24 1.62 1.62 0 0 0 0-3.24z" />
+              </svg>
+              <span>E. Zamora</span>
+            </a>
+            <span class="fv-chip-miembro fv-chip-single" title="José Zambrano Zambrano">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="7" r="4" />
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              </svg>
+              <span>J. Zambrano</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </footer>
+  </div>
+
+  <dialog id="modal">
+    <form method="dialog" id="modalForm" class="modal-caja">
+      <button class="modal-cerrar" type="button" id="modalCloseBtn" aria-label="Cerrar">×</button>
+      <div id="modalContent"></div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+    <script src="vendor/leaflet.js"></script>
+    <!-- Configuracion de integracion: unico archivo a editar para conectar
+         la API de estaciones, el historico, las solicitudes y el modelo. -->
+    <script src="config.js?v=3"></script>
+    <script src="app.js?v=100"></script>
+  </body>
+</html>

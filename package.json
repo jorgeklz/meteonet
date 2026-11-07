@@ -1,0 +1,10 @@
+{
+  "name": "utm-meteonet-mejora",
+  "version": "1.0.0",
+  "private": true,
+  "description": "UTM MeteoNet - Observatorio Meteorológico de la Universidad Técnica de Manabí",
+  "scripts": {
+    "start": "python3 -m http.server 8080"
+  }
+}
+

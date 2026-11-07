@@ -1,0 +1,9 @@
+# Archivos de sistema de macOS
+.DS_Store
+**/.DS_Store
+
+# Carpeta de trabajo ajena al proyecto (generador de preguntas Moodle)
+.tmp_moodle_questions/
+
+# Dependencias y artefactos de build
+node_modules/
