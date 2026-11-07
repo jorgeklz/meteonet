@@ -197,23 +197,13 @@ window.METEONET_CONFIG = {
   },
 
   /* ---------------------------------------------------------------------------
-     6. Contador de visitas
+     6. Contador de visitas (Supabase)
      ---------------------------------------------------------------------------
-     Contador independiente y exclusivo para UTM MeteoNet.
-     - url y clave: proyecto propio en Supabase para MeteoNet.
-       Para que funcione, ejecuta en el SQL Editor de Supabase el archivo
-       'supabase/visitas.sql'.
-     - Si la clave está vacía, MeteoNet utiliza automáticamente su propio
-       almacenamiento local aislado para contabilizar visitas sin depender de
-       servicios externos ni mezclar datos con otros sitios.
+     Proyecto propio de Supabase para UTM MeteoNet.
+     Utiliza las funciones RPC registrar_visita() y resumen_visitas().
   --------------------------------------------------------------------------- */
   visitas: {
     url: 'https://zxwnahximblzfskqppkg.supabase.co',
     clave: 'sb_publishable_wcUsOrBfOKnEkSLglYjUXw_vE4uP-Aj',
-    almacenamientoClave: 'utm-meteonet-visitas-v1',
   },
 };
-
-window.SITE_CONFIG = Object.assign(window.SITE_CONFIG || {}, {
-  visitas: window.METEONET_CONFIG.visitas,
-});

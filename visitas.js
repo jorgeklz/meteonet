@@ -1,38 +1,25 @@
 /* =============================================================================
    UTM MeteoNet · Contador de visitas propio
    -----------------------------------------------------------------------------
-   Registra y muestra las estadísticas de visitas propias de UTM MeteoNet.
-   - Si config.js tiene configurado un proyecto propio de Supabase (url y clave),
-     se sincroniza con él mediante RPC.
-   - Si no está configurado, opera con almacenamiento propio aislado (localStorage)
-     para MeteoNet, garantizando que nunca se mezclen datos con otros portales.
+   Registra visitas anónimas en Supabase (huella SHA-256 por IP cada 6 horas)
+   y muestra el resumen de visitantes, visitas de las últimas 24 horas,
+   países y ciudades recientes.
    ============================================================================= */
 (function () {
   'use strict';
 
-  var cfg =
-    (window.METEONET_CONFIG && window.METEONET_CONFIG.visitas) ||
-    (window.SITE_CONFIG && window.SITE_CONFIG.visitas) ||
-    {};
+  var cfg = (window.METEONET_CONFIG && window.METEONET_CONFIG.visitas) || {};
+  if (!cfg.url || !cfg.clave) return;
 
   var barra = document.querySelector('.topbar-acciones');
   if (!barra || document.getElementById('visitas')) return;
 
-  var STORAGE_KEY = cfg.almacenamientoClave || 'utm-meteonet-visitas-v1';
-  var SESSION_KEY = 'utm-meteonet-vis-sesion';
-  var ES = document.documentElement.lang === 'es' || true;
-  var LOCALE = ES ? 'es-EC' : 'en-US';
+  var LOCALE = 'es-EC';
   var REFRESCO_MS = 120000;
   var ROTACION_MS = 5000;
   var GEO_URL = 'https://get.geojs.io/v1/ip/geo.json';
   var TZ = 'America/Guayaquil';
-  var OFFSET_EC = -5 * 3600000;
-
-  var usaSupabase = Boolean(
-    cfg.url &&
-    cfg.clave &&
-    !cfg.url.includes('jomcyyksphmhuonyxpua') // evita el proyecto compartido de perfiles-utm
-  );
+  var base = cfg.url.replace(/\/+$/, '') + '/rest/v1/rpc/';
 
   var T = {
     visitas: 'Visitas',
@@ -43,7 +30,7 @@
     paises: 'Países',
     recientes: 'Visitas recientes',
     top: 'Países con más visitas',
-    desconocido: 'Ecuador',
+    desconocido: 'Ubicación no identificada',
     nota: 'Cada visitante cuenta una vez cada 6 horas. No se almacenan direcciones IP: solo país y ciudad aproximados. Horario de Ecuador (GMT-5).',
     tituloBtn: function (t, h) {
       return t + ' visitas registradas · ' + h + ' en las últimas 24 h';
@@ -52,14 +39,9 @@
     ahora: 'ahora',
     hace: 'hace ',
     ayer: 'ayer',
-    min: ' min',
-    h: ' h',
-    ec: ' (hora de Ecuador)',
     mil: ' mil',
     millon: ' M'
   };
-
-  var CORTO = { min: ' min', h: ' h' };
 
   var nombres = null;
   try {
@@ -71,7 +53,7 @@
   var IC_WORLD =
     '<svg class="vis-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
 
-  // Estructura DOM
+  // Estructura en la barra
   var caja = document.createElement('div');
   caja.className = 'visitas';
   caja.id = 'visitas';
@@ -102,7 +84,7 @@
 
   function compacto(n) {
     n = Number(n || 0);
-    if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + T.millon;
+    if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '').replace('.', ',') + T.millon;
     if (n >= 1e4) return Math.round(n / 1e3) + T.mil;
     return num(n);
   }
@@ -139,13 +121,13 @@
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
-      }) + T.ec
+      }) + ' (hora de Ecuador)'
     );
   }
 
   function hace(d, corto) {
     var seg = Math.max(0, (Date.now() - d.getTime()) / 1000);
-    var u = corto ? CORTO : T;
+    var u = corto ? { min: ' min', h: ' h' } : { min: ' min', h: ' h' };
     var pre = corto ? '' : T.hace;
     if (seg < 90) return T.ahora;
     if (seg < 3600) return pre + Math.round(seg / 60) + u.min;
@@ -172,85 +154,14 @@
       2500
     )
       .then(function (g) {
-        return { p_codigo: g.country_code || 'EC', p_ciudad: g.city || 'Portoviejo' };
+        return { p_codigo: g.country_code || null, p_ciudad: g.city || null };
       })
       .catch(function () {
-        return { p_codigo: 'EC', p_ciudad: 'Portoviejo' };
+        return {};
       });
   }
 
-  // ---------- Motor propio para MeteoNet (localStorage) ----------
-  function obtenerEstadoLocal() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch (e) {}
-
-    // Datos base iniciales propios de MeteoNet
-    var ahora = new Date();
-    return {
-      total: 14,
-      hoy: 4,
-      paises: 2,
-      top: [
-        { codigo: 'EC', n: 12 },
-        { codigo: 'US', n: 2 }
-      ],
-      recientes: [
-        { codigo: 'EC', ciudad: 'Portoviejo', fecha: ahora.toISOString() },
-        { codigo: 'EC', ciudad: 'Manta', fecha: new Date(ahora.getTime() - 42 * 60000).toISOString() },
-        { codigo: 'EC', ciudad: 'Chone', fecha: new Date(ahora.getTime() - 135 * 60000).toISOString() },
-        { codigo: 'US', ciudad: 'Miami', fecha: new Date(ahora.getTime() - 280 * 60000).toISOString() }
-      ]
-    };
-  }
-
-  function guardarEstadoLocal(st) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
-    } catch (e) {}
-  }
-
-  function registrarVisitaLocal(geo) {
-    var st = obtenerEstadoLocal();
-    var ahora = new Date();
-    var ultimaSesion = sessionStorage.getItem(SESSION_KEY);
-
-    if (!ultimaSesion) {
-      sessionStorage.setItem(SESSION_KEY, ahora.toISOString());
-      st.total = (st.total || 0) + 1;
-      st.hoy = (st.hoy || 0) + 1;
-
-      var cod = geo.p_codigo || 'EC';
-      var ciu = geo.p_ciudad || 'Portoviejo';
-
-      st.recientes = st.recientes || [];
-      st.recientes.unshift({ codigo: cod, ciudad: ciu, fecha: ahora.toISOString() });
-      if (st.recientes.length > 8) st.recientes = st.recientes.slice(0, 8);
-
-      var topMap = {};
-      (st.top || []).forEach(function (item) {
-        topMap[item.codigo] = item.n;
-      });
-      topMap[cod] = (topMap[cod] || 0) + 1;
-      st.top = Object.keys(topMap)
-        .map(function (k) {
-          return { codigo: k, n: topMap[k] };
-        })
-        .sort(function (a, b) {
-          return b.n - a.n;
-        })
-        .slice(0, 6);
-
-      st.paises = st.top.length;
-      guardarEstadoLocal(st);
-    }
-    return Promise.resolve(st);
-  }
-
-  // ---------- Conexión Supabase (proyecto propio de MeteoNet) ----------
   function rpc(nombre, cuerpo) {
-    var base = cfg.url.replace(/\/+$/, '') + '/rest/v1/rpc/';
     var cabeceras = {
       apikey: cfg.clave,
       Authorization: 'Bearer ' + cfg.clave,
@@ -267,7 +178,6 @@
     });
   }
 
-  // ---------- Renderizado ----------
   function pintar() {
     if (!datos) return;
     caja.hidden = false;
@@ -403,50 +313,37 @@
 
   function inicializar() {
     geolocalizar().then(function (geo) {
-      if (usaSupabase) {
-        rpc('registrar_visita', geo)
-          .then(function (r) {
-            datos = r;
-            pintar();
-          })
-          .catch(function () {
-            // Respaldo local si falla la red o el servicio
-            registrarVisitaLocal(geo).then(function (r) {
-              datos = r;
-              pintar();
-            });
-          });
-      } else {
-        registrarVisitaLocal(geo).then(function (r) {
+      rpc('registrar_visita', geo)
+        .then(function (r) {
           datos = r;
           pintar();
+        })
+        .catch(function (err) {
+          console.warn('Contador de visitas:', err.message);
         });
-      }
     });
   }
 
   inicializar();
+
   setInterval(function () {
     if (document.hidden || !datos) return;
-    if (usaSupabase) {
+    rpc('resumen_visitas')
+      .then(function (r) {
+        datos = r;
+        pintar();
+      })
+      .catch(function () {});
+  }, REFRESCO_MS);
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && datos) {
       rpc('resumen_visitas')
         .then(function (r) {
           datos = r;
           pintar();
         })
         .catch(function () {});
-    } else {
-      datos = obtenerEstadoLocal();
-      pintar();
-    }
-  }, REFRESCO_MS);
-
-  document.addEventListener('visibilitychange', function () {
-    if (!document.hidden && datos) {
-      if (!usaSupabase) {
-        datos = obtenerEstadoLocal();
-        pintar();
-      }
     }
   });
 })();
