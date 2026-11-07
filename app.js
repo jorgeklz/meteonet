@@ -155,7 +155,7 @@ function formatTemp(valor) {
    La hoja declara `--version-estilos`; si no coincide con esta constante, se
    recarga una sola vez saltando la cache.
    -------------------------------------------------------------------------- */
-const VERSION_ESTILOS = 123;
+const VERSION_ESTILOS = 124;
 
 (function comprobarVersionDeEstilos() {
   const leida = Number(
