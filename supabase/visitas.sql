@@ -118,3 +118,4 @@ grant execute on function public.resumen_visitas() to anon, authenticated;
 commit;
 
 notify pgrst, 'reload schema';
+
