@@ -195,4 +195,19 @@ window.METEONET_CONFIG = {
     demoUsuario: 'admin',
     demoClave: 'utm2026',
   },
+
+  /* ---------------------------------------------------------------------------
+     6. Contador de visitas (Supabase)
+     ---------------------------------------------------------------------------
+     Mismo contador que en el portal de Investigadores UTM (perfiles-utm).
+     Registra visitas de forma anónima con huella cifrada cada 6 horas.
+  --------------------------------------------------------------------------- */
+  visitas: {
+    url: 'https://jomcyyksphmhuonyxpua.supabase.co',
+    clave: 'sb_publishable_WNEWh_ecXbA81vdr4KQPgA_aAElm-AC',
+  },
 };
+
+window.SITE_CONFIG = Object.assign(window.SITE_CONFIG || {}, {
+  visitas: window.METEONET_CONFIG.visitas,
+});

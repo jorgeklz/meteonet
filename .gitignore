@@ -7,3 +7,4 @@
 
 # Dependencias y artefactos de build
 node_modules/
+.Rhistory
