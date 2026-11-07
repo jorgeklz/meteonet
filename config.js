@@ -209,7 +209,7 @@ window.METEONET_CONFIG = {
   --------------------------------------------------------------------------- */
   visitas: {
     url: 'https://zxwnahximblzfskqppkg.supabase.co',
-    clave: '',
+    clave: 'sb_publishable_wcUsOrBfOKnEkSLglYjUXw_vE4uP-Aj',
     almacenamientoClave: 'utm-meteonet-visitas-v1',
   },
 };

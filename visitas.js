@@ -248,11 +248,14 @@
     return Promise.resolve(st);
   }
 
-  // ---------- Conexión Supabase (si el usuario configura su propio proyecto) ----------
+  // ---------- Conexión Supabase (proyecto propio de MeteoNet) ----------
   function rpc(nombre, cuerpo) {
     var base = cfg.url.replace(/\/+$/, '') + '/rest/v1/rpc/';
-    var cabeceras = { apikey: cfg.clave, 'Content-Type': 'application/json' };
-    if (/^eyJ/.test(cfg.clave)) cabeceras.Authorization = 'Bearer ' + cfg.clave;
+    var cabeceras = {
+      apikey: cfg.clave,
+      Authorization: 'Bearer ' + cfg.clave,
+      'Content-Type': 'application/json'
+    };
 
     return fetch(base + nombre, {
       method: 'POST',
