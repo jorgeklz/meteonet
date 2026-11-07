@@ -2,7 +2,7 @@
 :root {
   /* Debe coincidir con VERSION_ESTILOS en app.js. Si el navegador sirve una
      hoja vieja de la cache, la aplicacion lo detecta y recarga una vez. */
-  --version-estilos: 126;
+  --version-estilos: 128;
   --bg: #f7f8f5; --superficie: #ffffff; --superficie2: #f0f2ec; --borde: #e1e5db;
   --texto: #17220f; --texto2: #55604a; --texto3: #7f8a73;
   --g1: #1e6b14; --g2: #2e8a1f; --g3: #4aab30; --g4: #72c255; --g6: #e2f2da;
@@ -1295,11 +1295,8 @@ a.fv-chip-miembro:hover .fv-ico-in {
   border-radius: 14px;
   position: relative;
   padding: 7px 8px 8px;
-  /* Translucidas como en el observatorio original, para que se vea la foto
-     a traves. Se oscurece un punto respecto al rgba(67,149,65,.5) de alli,
-     porque con aquel valor el texto blanco quedaba en 3.74 de contraste,
-     por debajo del 4.5 que pide la norma. */
-  background: rgba(24, 74, 20, 0.44);
+  /* Fondo transparente para efecto cristal liquido puro sobre el fondo */
+  background: transparent !important;
   color: #ffffff;
   text-align: center;
   font-family: 'Montserrat', sans-serif;
@@ -3192,17 +3189,73 @@ a.fv-chip-miembro:hover .fv-ico-in {
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .solicitud-meteonet-card {
     padding: 16px 14px 20px;
     margin-top: 8px;
   }
   .sm-grid-2,
   .sm-chips-estaciones {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+  }
+  .sm-grid-2 {
+    gap: 12px !important;
+    width: 100% !important;
+  }
+  .sm-campo {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .sm-input[type="date"],
+  .sm-input {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+  }
+  .sm-label-fila {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+  .sm-presets-fecha {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 6px !important;
+  }
+  .sm-preset-btn {
+    flex: 1 1 auto !important;
+    text-align: center !important;
+    font-size: 10.5px !important;
+    padding: 5px 8px !important;
+    white-space: nowrap !important;
   }
   .sm-titulo-principal {
     font-size: 18px;
+  }
+
+  /* Filtros de fecha en historico adaptados a movil */
+  #historyFilters {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  #historyFilters label.nota {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    width: 100% !important;
+    font-size: 11px !important;
+  }
+  #historyFilters input[type="date"].entrada {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
 }
 
