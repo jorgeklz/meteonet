@@ -2,7 +2,7 @@
 :root {
   /* Debe coincidir con VERSION_ESTILOS en app.js. Si el navegador sirve una
      hoja vieja de la cache, la aplicacion lo detecta y recarga una vez. */
-  --version-estilos: 120;
+  --version-estilos: 121;
   --bg: #f7f8f5; --superficie: #ffffff; --superficie2: #f0f2ec; --borde: #e1e5db;
   --texto: #17220f; --texto2: #55604a; --texto3: #7f8a73;
   --g1: #1e6b14; --g2: #2e8a1f; --g3: #4aab30; --g4: #72c255; --g6: #e2f2da;
@@ -854,7 +854,10 @@ dialog#modal::backdrop {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-width: 380px;
+  /* Ancho suficiente para que "Observatorio Meteorologico parte del proyecto
+     de investigacion ObservaIA" quepa en una linea; el salto a la
+     universidad va en el marcado. */
+  max-width: 460px;
 }
 
 .fv-marca-titulo {
@@ -875,9 +878,6 @@ dialog#modal::backdrop {
   color: #55604a;
   line-height: 1.4;
   margin: 0;
-  /* Reparte la primera frase entre sus lineas en vez de dejar "ObservaIA"
-     solo al final. El salto antes de la universidad va en el marcado. */
-  text-wrap: balance;
 }
 
 .fv-marca-loc {
@@ -3673,11 +3673,13 @@ a.fv-chip-miembro:hover .fv-ico-in {
     margin-bottom: 2px;
   }
   .fv-a-chips-grid {
-    display: flex;
-    flex-wrap: wrap;
+    /* En rejilla de tres no queda ningun nombre solo en su linea, como
+       pasaba con el ajuste libre. */
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: center;
     justify-content: flex-start;
-    gap: 6px 14px;
+    gap: 2px 10px;
     width: 100%;
     max-width: 100%;
   }
@@ -5107,25 +5109,37 @@ button[data-edit-station]:active {
   .leaflet-popup-content .mapa-ficha-estacion {
     /* Tope por debajo del alto del mapa, para que el globo nunca sobresalga
        y la parte que no entre se pueda desplazar. */
-    max-height: 56vh;
+    max-height: 60vh;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding-right: 2px;
   }
 
   .mfe-patron {
-    margin-top: 8px;
-    padding-top: 8px;
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+
+  .mfe-med-item {
+    padding: 3px 6px;
+  }
+
+  .mfe-grid-mediciones {
+    gap: 4px;
+  }
+
+  .mfe-separador {
+    margin: 4px 0;
   }
 
   .mfp-fila {
-    grid-template-columns: 98px 1fr auto;
+    grid-template-columns: 94px 1fr auto;
     gap: 6px;
-    padding: 1px 0;
+    padding: 0;
   }
 
   .mfp-curva {
-    height: 22px;
+    height: 17px;
   }
 
   /* En movil la ficha se lee a un brazo de distancia: nada por debajo de
