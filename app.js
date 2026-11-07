@@ -1779,8 +1779,8 @@ function renderMainWeatherMap() {
     const esMovil = typeof window !== 'undefined' && window.innerWidth <= 768;
     marker.bindPopup(() => buildStationMeasurementCardHtml(st), {
       className: 'popup-meteonet-wrap',
-      maxWidth: esMovil ? 250 : 340,
-      minWidth: esMovil ? 210 : 300,
+      maxWidth: esMovil ? 290 : 340,
+      minWidth: esMovil ? 240 : 300,
       autoPanPadding: [10, 60],
     });
     /* Al abrir la ficha se desplaza la pagina para que no quede detras de la
