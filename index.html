@@ -13,7 +13,7 @@
     href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="vendor/leaflet.css" />
-  <link rel="stylesheet" href="estilos.css?v=109" />
+  <link rel="stylesheet" href="estilos.css?v=119" />
   <link rel="stylesheet" href="visitas.css?v=4" />
 </head>
 
@@ -58,6 +58,7 @@
           </nav>
 
           <div class="web-actions">
+            <!-- Aqui se monta el contador de visitas (visitas.js) -->
             <div class="topbar-acciones"></div>
             <button type="button" class="btn-info-icono nav-utilidad" id="accessButton"
               aria-label="Acceso administrador" title="Acceso administrador">
@@ -471,12 +472,12 @@
                 <div class="sm-campo">
                   <div class="sm-label-fila">
                     <label>Seleccione estación meteorológica: <span class="sm-req">*</span></label>
-                    <span class="sm-ayuda-chip">Haz clic para elegir estación</span>
+                    <button type="button" class="sm-btn-todas" id="toggleAllStationsBtn">Seleccionar todas</button>
                   </div>
-                  <div class="sm-chips-estaciones" id="requestStationChips" role="radiogroup"
+                  <div class="sm-chips-estaciones" id="requestStationChips" role="group"
                     aria-label="Seleccione estación meteorológica"></div>
-                  <!-- Select sincronizado para compatibilidad del formulario -->
-                  <select class="selector" name="station" id="requestStation" required hidden></select>
+                  <!-- Campo sincronizado para el envío del formulario -->
+                  <input type="hidden" name="station" id="requestStation" />
                 </div>
 
                 <div class="sm-campo" style="margin-top:14px">
@@ -559,6 +560,12 @@
                     placeholder="Describa brevemente el proyecto de investigación, tesis o actividad académica..."
                     required></textarea>
                 </div>
+
+                <p class="sm-destino">
+                  La solicitud llega al equipo del observatorio en
+                  <a href="mailto:meteonet@utm.edu.ec">meteonet@utm.edu.ec</a>, que responderá al correo que
+                  indiques.
+                </p>
               </div>
 
               <!-- Compromiso con interruptor estilo MeteoNet -->
@@ -578,11 +585,6 @@
                 <button class="sm-boton-gradiente" id="submitRequestBtn" type="submit" disabled>
                   Enviar solicitud
                 </button>
-                <p class="sm-destino">
-                  La solicitud llega al equipo del observatorio en
-                  <a href="mailto:meteonet@utm.edu.ec">meteonet@utm.edu.ec</a>, que responderá al correo que
-                  indiques.
-                </p>
               </div>
             </form>
           </div>
@@ -962,7 +964,7 @@
           <p class="fv-marca-desc">Observatorio Meteorológico parte del proyecto de investigación
             <span class="fv-proyecto-nombre"
               title="ObservaIA: Observatorios de Datos Multitemáticos con Analítica Avanzada e Inteligencia Artificial">ObservaIA</span>
-            · Universidad Técnica de Manabí</p>
+            <br />Universidad Técnica de Manabí</p>
           <p class="fv-marca-loc">Portoviejo, Manabí, Ecuador © 2026</p>
         </div>
 
@@ -1037,8 +1039,8 @@
     <script src="vendor/leaflet.js"></script>
     <!-- Configuracion de integracion: unico archivo a editar para conectar
          la API de estaciones, el historico, las solicitudes y el modelo. -->
-    <script src="config.js?v=6"></script>
+    <script src="config.js?v=4"></script>
+    <script src="app.js?v=111"></script>
     <script src="visitas.js?v=5"></script>
-    <script src="app.js?v=108"></script>
   </body>
 </html>

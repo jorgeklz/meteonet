@@ -1,0 +1,1 @@
+{"name":"dotenv","version":"16.4.5","main":"config.js","exports":{"./config":"./config.js",".":"./config.js"}}

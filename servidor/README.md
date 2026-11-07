@@ -6,6 +6,16 @@ código público y guardar las lecturas para que el histórico sea real.
 
 Está pensado para leerse y adaptarse. No lo despliegues sin revisarlo.
 
+## Pruebas
+
+```bash
+node servidor.js        # arranca de verdad
+```
+
+El archivo exporta `app` y `muestrear`, y solo abre el puerto cuando se
+ejecuta directamente. Al importarlo desde una prueba no levanta nada ni dispara
+el muestreo.
+
 ## Puesta en marcha
 
 ```bash
@@ -43,6 +53,16 @@ npm start
 | `/api/get_station_history?stationId=&desde=&hasta=` | GET | Histórico desde la base de datos |
 | `/api/solicitudes` | POST | Registra la solicitud y avisa por correo a meteonet@utm.edu.ec |
 | `/api/login` | POST | Valida credenciales y devuelve un token de sesión |
+| `/api/logout` | POST | Cierra la sesión del token enviado |
+| `/api/solicitudes` | GET | Lista las solicitudes recibidas. Exige sesión de administración |
+
+Las rutas se declaran una por una a propósito. Con un comodín `/api/:ruta`,
+Express atendía ahí también `/api/get_station_history` y lo rechazaba antes de
+llegar a su manejador, así que el histórico quedaba inalcanzable.
+
+El listado de solicitudes lleva nombre, documento y correo de quien solicita,
+por eso pide la cabecera `Authorization: Bearer <token>` que devuelve
+`/api/login`.
 
 ## Cómo apuntar el sitio aquí
 
@@ -112,8 +132,17 @@ preparadas del principio.
 Esto es un punto de partida honesto, no un sistema terminado. Antes de exponerlo:
 
 - **HTTPS.** Detrás de nginx o Caddy, nunca en claro.
-- **Límite de peticiones** en `/api/login` y `/api/solicitudes`, para que nadie
-  pruebe claves ni llene la tabla.
-- **Sesiones persistentes.** Ahora viven en memoria y se pierden al reiniciar.
 - **Copias de seguridad** del archivo `.db`.
 - **Registro de auditoría** de quién accede y qué cambia.
+
+Ya resueltos, por si te preguntas dónde están:
+
+- **Límite de peticiones.** Ventana deslizante en memoria, sin dependencias:
+  ocho intentos de acceso cada diez minutos y cinco solicitudes por hora, por
+  dirección. Responde 429 con `Retry-After`. Con varios procesos detrás de un
+  balanceador haría falta un contador compartido, por ejemplo en Redis.
+- **Sesiones persistentes.** Viven en la tabla `sesiones`, así que un reinicio
+  no echa a quien estaba dentro. Las caducadas se purgan en cada acceso.
+- **Tiempo de respuesta uniforme en el acceso.** El hash se compara siempre,
+  incluso con un usuario que no existe. Si solo se comparara cuando el usuario
+  acierta, la demora delataría qué usuarios son válidos.

@@ -146,6 +146,33 @@ function formatTemp(valor) {
   return Number.isFinite(n) ? n.toFixed(1) : SIN_DATO;
 }
 
+/* -----------------------------------------------------------------------------
+   Coherencia entre la hoja de estilos y este archivo
+   -----------------------------------------------------------------------------
+   index.html no lleva version en su propia URL, asi que un navegador puede
+   servirlo de la cache y pedir una hoja de estilos antigua junto a un app.js
+   nuevo. El resultado son fichas con el fondo anterior e iconos invisibles.
+   La hoja declara `--version-estilos`; si no coincide con esta constante, se
+   recarga una sola vez saltando la cache.
+   -------------------------------------------------------------------------- */
+const VERSION_ESTILOS = 119;
+
+(function comprobarVersionDeEstilos() {
+  const leida = Number(
+    getComputedStyle(document.documentElement).getPropertyValue('--version-estilos').trim()
+  );
+  if (!leida || leida === VERSION_ESTILOS) {
+    sessionStorage.removeItem('utm-meteonet-recarga-estilos');
+    return;
+  }
+  if (sessionStorage.getItem('utm-meteonet-recarga-estilos')) {
+    console.warn(`Hoja de estilos en version ${leida}, se esperaba ${VERSION_ESTILOS}.`);
+    return;
+  }
+  sessionStorage.setItem('utm-meteonet-recarga-estilos', '1');
+  location.reload();
+})();
+
 /* Fecha en formato AAAA-MM-DD segun el huso del visitante.
    toISOString() da UTC, y en Ecuador (UTC-5) eso adelanta un dia a partir de
    las 19:00, lo que ponia el tope de los campos de fecha en manana. */
@@ -1198,7 +1225,7 @@ function renderDashboard() {
     <!-- 1. Humedad -->
     <article class="recuadro-variable">
       <div class="rv-cab">
-        <img src="assets/images/humedad.png" alt="Humedad" class="rv-icono" />
+        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/humedad.png');-webkit-mask:url('assets/images/humedad.png') center/contain no-repeat;mask:url('assets/images/humedad.png') center/contain no-repeat;background-color:#ffffff"></span>
         <span class="rv-titulo">Humedad</span>
       </div>
       <div class="rv-cuerpo">
@@ -1212,7 +1239,7 @@ function renderDashboard() {
     <!-- 2. Precipitación -->
     <article class="recuadro-variable">
       <div class="rv-cab">
-        <img src="assets/images/precipitacion.png" alt="Precipitación" class="rv-icono" />
+        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/precipitacion.png');-webkit-mask:url('assets/images/precipitacion.png') center/contain no-repeat;mask:url('assets/images/precipitacion.png') center/contain no-repeat;background-color:#ffffff"></span>
         <span class="rv-titulo">Precipitación</span>
       </div>
       <div class="rv-cuerpo">
@@ -1227,7 +1254,7 @@ function renderDashboard() {
     <!-- 3. Presión atmosférica -->
     <article class="recuadro-variable">
       <div class="rv-cab">
-        <img src="assets/images/presion-atmosferica.png" alt="Presión atmosférica" class="rv-icono" />
+        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/presion-atmosferica.png');-webkit-mask:url('assets/images/presion-atmosferica.png') center/contain no-repeat;mask:url('assets/images/presion-atmosferica.png') center/contain no-repeat;background-color:#ffffff"></span>
         <span class="rv-titulo">Presión atmosférica</span>
       </div>
       <div class="rv-cuerpo">
@@ -1235,13 +1262,13 @@ function renderDashboard() {
       </div>
       <div class="rv-gauge-wrap">
         <svg viewBox="0 0 100 60" class="rv-gauge-svg">
-          <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#ccc" stroke-width="6"></path>
+          <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="6"></path>
           <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#ff8c1a" stroke-width="6" stroke-linecap="round"
             pathLength="100" stroke-dasharray="${(((pressAngle + 90) / 180) * 100).toFixed(1)} 100"></path>
           <line x1="50" y1="50" x2="50" y2="14" stroke="#ff8c1a" stroke-width="3.2" stroke-linecap="round" transform="rotate(${pressAngle.toFixed(1)} 50 50)"></line>
           <circle cx="50" cy="50" r="3.2" fill="#ff8c1a"></circle>
-          <text x="0" y="58" font-size="8" fill="white">Baja</text>
-          <text x="82" y="58" font-size="8" fill="white">Alta</text>
+          <text x="0" y="58" font-size="8" fill="#ffffff">Baja</text>
+          <text x="82" y="58" font-size="8" fill="#ffffff">Alta</text>
         </svg>
       </div>
     </article>
@@ -1249,7 +1276,7 @@ function renderDashboard() {
     <!-- 4. Velocidad del viento -->
     <article class="recuadro-variable">
       <div class="rv-cab">
-        <img src="assets/images/velocidad-viento.png" alt="Velocidad del viento" class="rv-icono" />
+        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/velocidad-viento.png');-webkit-mask:url('assets/images/velocidad-viento.png') center/contain no-repeat;mask:url('assets/images/velocidad-viento.png') center/contain no-repeat;background-color:#ffffff"></span>
         <span class="rv-titulo">Velocidad del viento</span>
       </div>
       <div class="rv-cuerpo">
@@ -1274,7 +1301,7 @@ function renderDashboard() {
     <!-- 5. Radiación solar -->
     <article class="recuadro-variable">
       <div class="rv-cab">
-        <img src="assets/images/radiacion.png" alt="Radiación solar" class="rv-icono" />
+        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/radiacion.png');-webkit-mask:url('assets/images/radiacion.png') center/contain no-repeat;mask:url('assets/images/radiacion.png') center/contain no-repeat;background-color:#ffffff"></span>
         <span class="rv-titulo">Radiación solar</span>
       </div>
       <div class="rv-cuerpo">
@@ -1289,7 +1316,7 @@ function renderDashboard() {
     <!-- 6. Índice UV -->
     <article class="recuadro-variable">
       <div class="rv-cab">
-        <img src="assets/images/uv.png" alt="Índice UV" class="rv-icono" />
+        <span class="rv-icono" aria-hidden="true" style="--icono:url('assets/images/uv.png');-webkit-mask:url('assets/images/uv.png') center/contain no-repeat;mask:url('assets/images/uv.png') center/contain no-repeat;background-color:#ffffff"></span>
         <span class="rv-titulo">Índice UV</span>
       </div>
       <div class="rv-cuerpo">
@@ -1776,16 +1803,17 @@ function renderMainWeatherMap() {
     /* El contenido se construye al abrir, no al crear el marcador: asi solo
        se consulta el historico de la estacion que la persona mira, y el
        patron por dia puede rellenarse cuando la ficha ya esta en pantalla. */
-    const esMovil = typeof window !== 'undefined' && window.innerWidth <= 768;
     marker.bindPopup(() => buildStationMeasurementCardHtml(st), {
       className: 'popup-meteonet-wrap',
-      maxWidth: esMovil ? 290 : 340,
-      minWidth: esMovil ? 240 : 300,
-      autoPanPadding: [10, 60],
+      maxWidth: 340,
+      minWidth: 300,
     });
     /* Al abrir la ficha se desplaza la pagina para que no quede detras de la
        cabecera fija, que en movil ocupa buena parte de lo alto. */
     marker.on('popupopen', (ev) => {
+      /* La columna de estaciones se aparta mientras la ficha esta abierta: en
+         movil ocupan el mismo rincon y los chips tapaban parte de la ficha. */
+      document.querySelector('.mapa-grande-contenedor')?.classList.add('con-ficha');
       setTimeout(() => {
         const globo = ev.popup?.getElement();
         if (!globo) return;
@@ -1799,6 +1827,10 @@ function renderMainWeatherMap() {
           window.scrollBy({ top: caja.bottom - window.innerHeight + margen, behavior: 'smooth' });
         }
       }, 120);
+    });
+
+    marker.on('popupclose', () => {
+      document.querySelector('.mapa-grande-contenedor')?.classList.remove('con-ficha');
     });
 
     marker.on('click', () => {
@@ -2029,7 +2061,13 @@ function renderDataRequests() {
     ? requests
         .map((req) => {
           const st = state.stations.find((s) => s.id === req.stationId);
-          const stName = req.stationId === 'all' ? 'Todas las estaciones' : st?.name || 'Estación';
+          const elegidas = estacionesDeSolicitud(req.stationId);
+          const stName =
+            req.stationId === 'all'
+              ? 'Todas las estaciones'
+              : elegidas.length > 1
+                ? `${elegidas.length} estaciones`
+                : elegidas[0]?.location || st?.name || 'Estación';
           const vars = (req.variables || []).map((v) => VARIABLE_LABELS[v] || v).join(', ');
           return `
             <tr>
@@ -2052,7 +2090,24 @@ function renderDataRequests() {
   $('#historyRequestsPanel').hidden = historyTab !== 'requests';
 }
 
-let requestSelectedStationId = 'all';
+/* Las estaciones se eligen igual que las variables: varias a la vez, con un
+   boton de "Seleccionar todas". Se envia 'all' cuando estan todas, el id
+   cuando es una sola y la lista separada por comas en los casos intermedios,
+   para no romper lo que ya guarda el servidor. */
+let requestSelectedStationIds = new Set();
+
+function idEstacionesSolicitadas() {
+  const total = state.stations.length;
+  if (!requestSelectedStationIds.size) return '';
+  if (total && requestSelectedStationIds.size === total) return 'all';
+  return [...requestSelectedStationIds].join(',');
+}
+
+function estacionesDeSolicitud(valor) {
+  if (!valor || valor === 'all') return state.stations;
+  const ids = String(valor).split(',');
+  return state.stations.filter((s) => ids.includes(s.id));
+}
 
 function validateDataRequestForm() {
   const submitBtn = $('#submitRequestBtn');
@@ -2080,7 +2135,7 @@ function validateDataRequestForm() {
   const agreementOk = Boolean($('#reqAgreement')?.checked);
   const activeVars = $all('#requestVariableChips .sm-var-chip.activa');
   const varsOk = activeVars.length > 0;
-  const stationOk = Boolean(requestSelectedStationId);
+  const stationOk = requestSelectedStationIds.size > 0;
 
   const isComplete = Boolean(
     docVal &&
@@ -2131,49 +2186,37 @@ function syncRequestVariablesSelect() {
 }
 
 function renderDataRequestForm() {
-  const select = $('#requestStation');
-  if (select) {
-    select.innerHTML = `<option value="all" ${requestSelectedStationId === 'all' ? 'selected' : ''}>Todas las estaciones</option>${state.stations
-      .map(
-        (s) =>
-          `<option value="${s.id}" ${requestSelectedStationId === s.id ? 'selected' : ''}>${escapeHtml(s.location)} (${escapeHtml(s.code || s.name)})</option>`
-      )
-      .join('')}`;
-    select.value = requestSelectedStationId;
-  }
+  const campoEstacion = $('#requestStation');
+  if (campoEstacion) campoEstacion.value = idEstacionesSolicitadas();
 
   const chipsEl = $('#requestStationChips');
   if (chipsEl) {
-    const items = [
-      { id: 'all', label: 'Todas las estaciones', sub: `${state.stations.length} estaciones de la red` },
-      ...state.stations.map((s) => ({
-        id: s.id,
-        label: s.location,
-        sub: s.code || s.name,
-      })),
-    ];
-    /* Mismo patron visual que los chips de variables: un indicador de
-       seleccion a la izquierda y el texto al lado. Redondo, no cuadrado,
-       porque aqui solo se puede elegir una estacion. */
-    chipsEl.innerHTML = items
-      .map((item) => {
-        const isAct = item.id === requestSelectedStationId;
+    /* Solo las estaciones. "Todas" dejo de ser una opcion de la lista y pasa
+       a ser el boton de la cabecera, igual que en las variables. */
+    chipsEl.innerHTML = state.stations
+      .map((s) => {
+        const isAct = requestSelectedStationIds.has(s.id);
         return `
           <button
             type="button"
             class="sm-estacion-chip ${isAct ? 'activa' : ''}"
-            data-req-station-chip="${escapeHtml(item.id)}"
-            role="radio"
-            aria-checked="${isAct}"
+            data-req-station-chip="${escapeHtml(s.id)}"
+            aria-pressed="${isAct}"
           >
             <span class="sec-check" aria-hidden="true">\u2713</span>
             <span class="sec-txt">
-              <span class="sec-nombre">${escapeHtml(item.label)}</span>
-              <small>${escapeHtml(item.sub)}</small>
+              <span class="sec-nombre">${escapeHtml(s.location)}</span>
+              <small>${escapeHtml(s.code || s.name)}</small>
             </span>
           </button>`;
       })
       .join('');
+  }
+
+  const btnTodas = $('#toggleAllStationsBtn');
+  if (btnTodas) {
+    const todas = state.stations.length > 0 && requestSelectedStationIds.size === state.stations.length;
+    btnTodas.textContent = todas ? 'Deseleccionar todas' : 'Seleccionar todas';
   }
 
   syncRequestVariablesSelect();
@@ -2208,7 +2251,7 @@ function requestedRows(station, startDate, endDate) {
 function generateRequestedData(requestId) {
   const request = (state.dataRequests || []).find((item) => item.id === requestId);
   if (!request) return showToast('No se encontró la solicitud');
-  const stations = request.stationId === 'all' ? state.stations : state.stations.filter((item) => item.id === request.stationId);
+  const stations = estacionesDeSolicitud(request.stationId);
   const variables = (request.variables || []).includes('all') ? WEATHER_VARIABLES : request.variables || WEATHER_VARIABLES;
   const headers = ['estacion', 'fecha_iso', ...variables];
   const rows = stations.flatMap((station) =>
@@ -2243,7 +2286,9 @@ function normalizeStationForReport(st, rangeVal = 'ahora') {
      escribe "Sin dato". Antes se reemplazaban por 1012.4 hPa, 250 W/m2 y UV 4,
      cifras que el boletin presentaba como medidas. */
   const basePres = st.pressure == null ? null : Number(st.pressure);
-  const baseWindKmh = st.windSpeed == null ? null : Number(st.windSpeed) * 3.6;
+  /* El viento viaja en m/s de principio a fin, igual que en el resto del
+     sistema. La escala Beaufort esta calibrada en esas mismas unidades. */
+  const baseWindMs = st.windSpeed == null ? null : Number(st.windSpeed);
   const baseRad = st.radiation == null ? null : Number(st.radiation);
   const baseUv = st.uvIndex == null || st.uvIndex === -1 ? null : Number(st.uvIndex);
   const baseSens = Number(st.feelsLike ?? baseTemp);
@@ -2253,7 +2298,7 @@ function normalizeStationForReport(st, rangeVal = 'ahora') {
   let hum = baseHum;
   let precip = basePrecip;
   let pres = basePres;
-  let windKmh = baseWindKmh;
+  let windMs = baseWindMs;
   let rad = baseRad;
   let uv = baseUv;
   let min = Number(st.tempMin ?? (baseTemp - 2.5));
@@ -2263,7 +2308,7 @@ function normalizeStationForReport(st, rangeVal = 'ahora') {
   let subTemp = `Sensación: ${sens.toFixed(1)} °C<br>Rango diario: ${min.toFixed(0)} °C a ${max.toFixed(0)} °C`;
   let subPrecip = `Lluvia instantánea<br>Tasa actual medida en estación`;
   let subHum = `Punto de rocío: ${puntoRocio(temp, hum).toFixed(1)} °C<br>Humedad ambiental en tiempo real`;
-  let subViento = `Dirección: ${dir}<br>Escala Beaufort: ${escalaBeaufort(windKmh).l}`;
+  let subViento = `Dirección: ${dir}<br>Escala Beaufort: ${escalaBeaufort(windMs).l}`;
   let subPres = `Barómetro a nivel del mar<br>Tendencia barométrica: estable`;
   let subRad = `Índice UV: ${uv.toFixed(1)} (${obtenerTextoUv(uv)})<br>Radiación solar directa`;
 
@@ -2273,7 +2318,7 @@ function normalizeStationForReport(st, rangeVal = 'ahora') {
     max = Number((baseTemp + 4.1).toFixed(1));
     hum = Math.min(95, Math.max(45, Math.round(baseHum * 0.95)));
     precip = Number(Math.max(basePrecip * 3.6 + 6.2, 8.4).toFixed(1));
-    windKmh = Number((baseWindKmh * 1.18).toFixed(1));
+    windMs = Number((baseWindMs * 1.18).toFixed(1));
     pres = Number((basePres - 0.5).toFixed(1));
     rad = Math.round(baseRad * 1.25);
     uv = Math.min(11, Number((baseUv * 1.2).toFixed(1)));
@@ -2282,7 +2327,7 @@ function normalizeStationForReport(st, rangeVal = 'ahora') {
     subTemp = `Media 24h<br>Mínima: ${min.toFixed(1)} °C · Máxima: ${max.toFixed(1)} °C`;
     subPrecip = `Acumulado en 24 horas<br>Total diario de precipitación`;
     subHum = `Media de las últimas 24h<br>Punto de rocío medio: ${puntoRocio(temp, hum).toFixed(1)} °C`;
-    subViento = `Media 24h: ${windKmh} km/h<br>Ráfaga máxima: ${(windKmh * 1.35).toFixed(1)} km/h`;
+    subViento = `Media 24h: ${windMs} m/s<br>Ráfaga máxima: ${(windMs * 1.35).toFixed(1)} m/s`;
     subPres = `Presión media 24h<br>Oscilación barométrica: ±1.1 hPa`;
     subRad = `Pico UV últimas 24h: ${uv}<br>Exposición solar promedio`;
   } else if (rangeVal === 'semana') {
@@ -2291,7 +2336,7 @@ function normalizeStationForReport(st, rangeVal = 'ahora') {
     max = Number((baseTemp + 5.4).toFixed(1));
     hum = Math.min(95, Math.max(40, Math.round(baseHum * 0.92)));
     precip = Number(Math.max(basePrecip * 8.5 + 24.6, 36.8).toFixed(1));
-    windKmh = Number((baseWindKmh * 1.28).toFixed(1));
+    windMs = Number((baseWindMs * 1.28).toFixed(1));
     pres = Number((basePres + 0.3).toFixed(1));
     rad = Math.round(baseRad * 1.4);
     uv = Math.min(12, Number((baseUv * 1.3).toFixed(1)));
@@ -2300,7 +2345,7 @@ function normalizeStationForReport(st, rangeVal = 'ahora') {
     subTemp = `Media 7 días<br>Mín semanal: ${min.toFixed(1)} °C · Máx: ${max.toFixed(1)} °C`;
     subPrecip = `Total acumulado 7 días<br>Régimen de lluvia semanal`;
     subHum = `Media de los últimos 7 días<br>Punto de rocío medio: ${puntoRocio(temp, hum).toFixed(1)} °C`;
-    subViento = `Media semanal: ${windKmh} km/h<br>Ráfaga máxima semanal: ${(windKmh * 1.5).toFixed(1)} km/h`;
+    subViento = `Media semanal: ${windMs} m/s<br>Ráfaga máxima semanal: ${(windMs * 1.5).toFixed(1)} m/s`;
     subPres = `Presión media semanal<br>Estabilidad barométrica regular`;
     subRad = `Pico UV semanal: ${uv}<br>Radiación solar acumulada`;
   }
@@ -2316,7 +2361,7 @@ function normalizeStationForReport(st, rangeVal = 'ahora') {
     precip,
     precipMensual: rainMonth,
     presion: pres,
-    viento: windKmh,
+    viento: windMs,
     direccion: dir,
     radiacion: rad,
     uv,
@@ -2370,20 +2415,24 @@ function deficitPresionVapor(T, RH) {
   const ea = (es * RH) / 100;
   return es - ea;
 }
-function escalaBeaufort(kmh) {
+/* Escala Beaufort con los limites oficiales en metros por segundo, que es la
+   unidad en la que la definio la Organizacion Meteorologica Mundial. Antes
+   recibia kilometros por hora y era el unico punto del sistema que no hablaba
+   en unidades del Sistema Internacional. */
+function escalaBeaufort(ms) {
   const escala = [
-    { max: 1, n: 0, l: 'calma' },
-    { max: 5, n: 1, l: 'ventolina' },
-    { max: 11, n: 2, l: 'brisa muy débil' },
-    { max: 19, n: 3, l: 'brisa débil' },
-    { max: 28, n: 4, l: 'brisa moderada' },
-    { max: 38, n: 5, l: 'brisa fresca' },
-    { max: 49, n: 6, l: 'brisa fuerte' },
-    { max: 61, n: 7, l: 'viento fuerte' },
-    { max: 74, n: 8, l: 'temporal' },
+    { max: 0.2, n: 0, l: 'calma' },
+    { max: 1.5, n: 1, l: 'ventolina' },
+    { max: 3.3, n: 2, l: 'brisa muy débil' },
+    { max: 5.4, n: 3, l: 'brisa débil' },
+    { max: 7.9, n: 4, l: 'brisa moderada' },
+    { max: 10.7, n: 5, l: 'brisa fresca' },
+    { max: 13.8, n: 6, l: 'brisa fuerte' },
+    { max: 17.1, n: 7, l: 'viento fuerte' },
+    { max: 20.7, n: 8, l: 'temporal' },
     { max: Infinity, n: 9, l: 'temporal fuerte' },
   ];
-  return escala.find((s) => kmh <= s.max);
+  return escala.find((s) => ms <= s.max);
 }
 function riesgoTermico(t, hi) {
   const score = Math.max(0, Math.min(100, Math.round((t - 15) * 3 + (hi - t) * 4)));
@@ -2794,9 +2843,12 @@ function generarRecomendacionesDinamicas(s, ind, rangoVal, promptKey) {
   }
 
   // 4. Viento y seguridad operacional
-  if (s.viento >= 24) {
+  /* 8 m/s es el inicio de la brisa fresca en la escala Beaufort, el punto en
+     que empiezan a moverse los objetos ligeros. Antes el umbral eran 24 m/s,
+     que son 6.7 m/s. */
+  if (s.viento >= 8) {
     recs.push(
-      `Vientos intensos (${s.viento.toFixed(1)} km/h): afianzar carpas, toldos y elementos ligeros en áreas abiertas de la universidad o comunidad.`
+      `Vientos intensos (${s.viento.toFixed(1)} m/s): afianzar carpas, toldos y elementos ligeros en áreas abiertas de la universidad o comunidad.`
     );
   } else if (promptKey === 'alerta') {
     recs.push(
@@ -2834,8 +2886,8 @@ function construirDocumento(s, ind, rangoVal, fecha, promptKey = selectedAiPromp
       rangoVal === '24h'
         ? `En las últimas 24 horas la estación <b>${escapeHtml(s.nombre)}</b> registra temperatura media de <b>${s.temp.toFixed(1)} °C</b> (mín ${s.min.toFixed(1)} °C / máx ${s.max.toFixed(1)} °C), humedad del <b>${s.humedad.toFixed(0)}%</b> y precipitación de <b>${s.precip.toFixed(1)} mm</b>. Nivel de riesgo térmico: <b>${ind.riesgo.nivel}</b>. Operatividad normal en el sector.`
         : rangoVal === 'semana'
-        ? `Balance semanal en <b>${escapeHtml(s.nombre)}</b>: promedio térmico de <b>${s.temp.toFixed(1)} °C</b>, acumulación pluvial de <b>${s.precip.toFixed(1)} mm</b> y vientos de <b>${s.viento.toFixed(1)} km/h</b>. Parámetros ambientales estables para la planificación institucional.`
-        : `Condición operativa en <b>${escapeHtml(s.nombre)}</b>: temperatura de <b>${s.temp.toFixed(1)} °C</b>, humedad de <b>${s.humedad.toFixed(0)}%</b>, radiación de <b>${s.radiacion} W/m²</b> y viento a <b>${s.viento.toFixed(1)} km/h</b>${dirVientoTxt}. Presión barométrica en <b>${s.presion.toFixed(1)} hPa</b>. Riesgo térmico: <b>${ind.riesgo.nivel}</b>.`;
+        ? `Balance semanal en <b>${escapeHtml(s.nombre)}</b>: promedio térmico de <b>${s.temp.toFixed(1)} °C</b>, acumulación pluvial de <b>${s.precip.toFixed(1)} mm</b> y vientos de <b>${s.viento.toFixed(1)} m/s</b>. Parámetros ambientales estables para la planificación institucional.`
+        : `Condición operativa en <b>${escapeHtml(s.nombre)}</b>: temperatura de <b>${s.temp.toFixed(1)} °C</b>, humedad de <b>${s.humedad.toFixed(0)}%</b>, radiación de <b>${s.radiacion} W/m²</b> y viento a <b>${s.viento.toFixed(1)} m/s</b>${dirVientoTxt}. Presión barométrica en <b>${s.presion.toFixed(1)} hPa</b>. Riesgo térmico: <b>${ind.riesgo.nivel}</b>.`;
 
     leadAnalisis = `Diagnóstico ejecutivo: Los parámetros meteorológicos evaluados se ubican dentro de los márgenes operacionales normales. La temperatura se categoriza como <b>${nivelT}</b> y la humedad relativa en rango <b>${nivelH}</b>. ${lluviaFrase} Las labores institucionales y comunitarias pueden continuar bajo protocolos estándar.`;
   } else if (promptKey === 'academico') {
@@ -2844,28 +2896,28 @@ function construirDocumento(s, ind, rangoVal, fecha, promptKey = selectedAiPromp
         ? `Monitoreo micrometeorológico (últimas 24 horas, estación ${escapeHtml(s.codigo || s.id)}): temperatura media de <b>${s.temp.toFixed(1)} °C</b> [${s.min.toFixed(1)} °C - ${s.max.toFixed(1)} °C], humedad relativa media del <b>${s.humedad.toFixed(0)}%</b>, precipitación acumulada de <b>${s.precip.toFixed(1)} mm</b> y barometría de <b>${s.presion.toFixed(1)} hPa</b>.`
         : rangoVal === 'semana'
         ? `Serie temporal semanal (estación ${escapeHtml(s.codigo || s.id)}): régimen térmico medio de <b>${s.temp.toFixed(1)} °C</b>, humedad atmosférica media del <b>${s.humedad.toFixed(0)}%</b>, precipitación acumulada de <b>${s.precip.toFixed(1)} mm</b> y flujo radiativo de <b>${s.radiacion} W/m²</b>.`
-        : `Caracterización física instrumental (estación ${escapeHtml(s.codigo || s.id)}): temperatura del aire de <b>${s.temp.toFixed(1)} °C</b>, humedad relativa de <b>${s.humedad.toFixed(0)}%</b>, irradiancia solar incidente de <b>${s.radiacion} W/m²</b> (UV ${s.uv.toFixed(1)}) y presión atmosférica de <b>${s.presion.toFixed(1)} hPa</b>. Viento vectorial a <b>${s.viento.toFixed(1)} km/h</b>${dirVientoTxt}.`;
+        : `Caracterización física instrumental (estación ${escapeHtml(s.codigo || s.id)}): temperatura del aire de <b>${s.temp.toFixed(1)} °C</b>, humedad relativa de <b>${s.humedad.toFixed(0)}%</b>, irradiancia solar incidente de <b>${s.radiacion} W/m²</b> (UV ${s.uv.toFixed(1)}) y presión atmosférica de <b>${s.presion.toFixed(1)} hPa</b>. Viento vectorial a <b>${s.viento.toFixed(1)} m/s</b>${dirVientoTxt}.`;
 
-    leadAnalisis = `Fundamentación termodinámica: El punto de rocío instrumental se sitúa en <b>${ind.dp.toFixed(1)} °C</b> y la temperatura de bulbo húmedo estimada en <b>${ind.wb.toFixed(1)} °C</b>, con un déficit de presión de vapor (VPD) de <b>${ind.vpd.toFixed(2)} kPa</b>. La velocidad de viento corresponde a la escala Beaufort <b>${ind.bft.l}</b> (${s.viento.toFixed(1)} km/h). ${lluviaFrase}`;
+    leadAnalisis = `Fundamentación termodinámica: El punto de rocío instrumental se sitúa en <b>${ind.dp.toFixed(1)} °C</b> y la temperatura de bulbo húmedo estimada en <b>${ind.wb.toFixed(1)} °C</b>, con un déficit de presión de vapor (VPD) de <b>${ind.vpd.toFixed(2)} kPa</b>. La velocidad de viento corresponde a la escala Beaufort <b>${ind.bft.l}</b> (${s.viento.toFixed(1)} m/s). ${lluviaFrase}`;
   } else if (promptKey === 'alerta') {
     const hayAlerta = ind.riesgo.score > 50 || s.uv >= 8 || s.precip >= 15;
     const estadoAlerta = hayAlerta ? 'Vigilancia meteorológica activa' : 'Situación estable';
     resumenTexto =
       rangoVal === '24h'
-        ? `<b>[${estadoAlerta}]</b> Registro 24h: temperatura máxima de ${s.max.toFixed(1)} °C, sensación térmica media de <b>${ind.hi.toFixed(1)} °C</b>, lluvia acumulada de <b>${s.precip.toFixed(1)} mm</b> y ráfagas de viento de hasta <b>${(s.viento * 1.35).toFixed(1)} km/h</b>. Nivel de riesgo térmico: <b>${ind.riesgo.nivel}</b>.`
+        ? `<b>[${estadoAlerta}]</b> Registro 24h: temperatura máxima de ${s.max.toFixed(1)} °C, sensación térmica media de <b>${ind.hi.toFixed(1)} °C</b>, lluvia acumulada de <b>${s.precip.toFixed(1)} mm</b> y ráfagas de viento de hasta <b>${(s.viento * 1.35).toFixed(1)} m/s</b>. Nivel de riesgo térmico: <b>${ind.riesgo.nivel}</b>.`
         : rangoVal === 'semana'
         ? `<b>[${estadoAlerta}]</b> Balance semanal de seguridad: acumulado de precipitaciones de <b>${s.precip.toFixed(1)} mm</b>, temperatura media de <b>${s.temp.toFixed(1)} °C</b> y radiación solar acumulada de <b>${s.radiacion} W/m²</b>. Mantener las pautas de autoprotección vigentes.`
-        : `<b>[${estadoAlerta}]</b> Aviso de prevención para <b>${escapeHtml(s.nombre)}</b>: sensación térmica de <b>${ind.hi.toFixed(1)} °C</b> (riesgo ${ind.riesgo.nivel}), radiación de <b>${s.radiacion} W/m²</b> (UV ${s.uv.toFixed(1)}) y viento a <b>${s.viento.toFixed(1)} km/h</b>${dirVientoTxt}. ${lluviaFrase}`;
+        : `<b>[${estadoAlerta}]</b> Aviso de prevención para <b>${escapeHtml(s.nombre)}</b>: sensación térmica de <b>${ind.hi.toFixed(1)} °C</b> (riesgo ${ind.riesgo.nivel}), radiación de <b>${s.radiacion} W/m²</b> (UV ${s.uv.toFixed(1)}) y viento a <b>${s.viento.toFixed(1)} m/s</b>${dirVientoTxt}. ${lluviaFrase}`;
 
     leadAnalisis = `Evaluación de riesgos y amenazas: El índice de calor se ubica en <b>${ind.hi.toFixed(1)} °C</b> con nivel de riesgo <b>${ind.riesgo.nivel}</b>. La radiación ultravioleta se clasifica como <b>${s.uv >= 11 ? 'Extrema' : s.uv >= 8 ? 'Muy Alta' : s.uv >= 6 ? 'Alta' : s.uv >= 3 ? 'Moderada' : 'Baja'}</b> (${s.radiacion} W/m²). ${lluviaFrase} Se recomienda acatar las instrucciones preventivas.`;
   } else {
     // tecnico o custom
     resumenTexto =
       rangoVal === '24h'
-        ? `En las últimas 24 horas se registra una temperatura promedio de <b>${s.temp.toFixed(1)} °C</b> (mínima de ${s.min.toFixed(1)} °C y máxima de ${s.max.toFixed(1)} °C), humedad relativa media de <b>${s.humedad.toFixed(0)}%</b> y precipitación acumulada de <b>${s.precip.toFixed(1)} mm</b>. El viento promedió <b>${s.viento.toFixed(1)} km/h</b> con presión atmosférica de <b>${s.presion.toFixed(1)} hPa</b>.`
+        ? `En las últimas 24 horas se registra una temperatura promedio de <b>${s.temp.toFixed(1)} °C</b> (mínima de ${s.min.toFixed(1)} °C y máxima de ${s.max.toFixed(1)} °C), humedad relativa media de <b>${s.humedad.toFixed(0)}%</b> y precipitación acumulada de <b>${s.precip.toFixed(1)} mm</b>. El viento promedió <b>${s.viento.toFixed(1)} m/s</b> con presión atmosférica de <b>${s.presion.toFixed(1)} hPa</b>.`
         : rangoVal === 'semana'
-        ? `Durante los últimos 7 días la temperatura promedio se situó en <b>${s.temp.toFixed(1)} °C</b> (mínima de ${s.min.toFixed(1)} °C y máxima de ${s.max.toFixed(1)} °C), con humedad relativa media de <b>${s.humedad.toFixed(0)}%</b> y precipitación acumulada de <b>${s.precip.toFixed(1)} mm</b>. El viento promedió <b>${s.viento.toFixed(1)} km/h</b> y radiación solar promedio de <b>${s.radiacion} W/m²</b>.`
-        : `Actualmente se registra una temperatura ambiente de <b>${s.temp.toFixed(1)} °C</b>, humedad relativa de <b>${s.humedad.toFixed(0)}%</b> y radiación solar de <b>${s.radiacion} W/m²</b>. El viento sopla a <b>${s.viento.toFixed(1)} km/h</b>${dirVientoTxt}. Presión atmosférica en <b>${s.presion.toFixed(1)} hPa</b>.`;
+        ? `Durante los últimos 7 días la temperatura promedio se situó en <b>${s.temp.toFixed(1)} °C</b> (mínima de ${s.min.toFixed(1)} °C y máxima de ${s.max.toFixed(1)} °C), con humedad relativa media de <b>${s.humedad.toFixed(0)}%</b> y precipitación acumulada de <b>${s.precip.toFixed(1)} mm</b>. El viento promedió <b>${s.viento.toFixed(1)} m/s</b> y radiación solar promedio de <b>${s.radiacion} W/m²</b>.`
+        : `Actualmente se registra una temperatura ambiente de <b>${s.temp.toFixed(1)} °C</b>, humedad relativa de <b>${s.humedad.toFixed(0)}%</b> y radiación solar de <b>${s.radiacion} W/m²</b>. El viento sopla a <b>${s.viento.toFixed(1)} m/s</b>${dirVientoTxt}. Presión atmosférica en <b>${s.presion.toFixed(1)} hPa</b>.`;
 
     leadAnalisis = `La temperatura actual se clasifica como <b>${nivelT}</b>, con una mínima de ${s.min.toFixed(1)} °C y máxima de ${s.max.toFixed(1)} °C. La humedad se mantiene en un rango <b>${nivelH}</b>. ${lluviaFrase}`;
   }
@@ -2924,7 +2976,7 @@ function construirDocumento(s, ind, rangoVal, fecha, promptKey = selectedAiPromp
         </div>
         <div class="doc-kpi-card">
           <span class="doc-kpi-label">Velocidad del viento</span>
-          <div class="doc-kpi-val">${s.viento.toFixed(1)} <small>km/h</small></div>
+          <div class="doc-kpi-val">${s.viento.toFixed(1)} <small>m/s</small></div>
           <div class="doc-kpi-sub">${s.subViento}</div>
         </div>
         <div class="doc-kpi-card">
@@ -3090,7 +3142,7 @@ Estación: ${s.nombre} (${s.codigo || s.id})
 1. Temperatura ambiente: ${s.temp.toFixed(2)} °C (Mín: ${s.min.toFixed(1)} °C, Máx: ${s.max.toFixed(1)} °C)
 2. Precipitación: ${s.precip.toFixed(2)} mm
 3. Humedad relativa: ${s.humedad.toFixed(1)} %
-4. Velocidad del viento: ${s.viento.toFixed(2)} km/h, dirección ${s.direccion}
+4. Velocidad del viento: ${s.viento.toFixed(2)} m/s, dirección ${s.direccion}
 5. Presión atmosférica: ${s.presion.toFixed(2)} hPa
 6. Radiación solar: ${s.radiacion} W/m² (Índice UV: ${s.uv.toFixed(1)})
 
@@ -4055,19 +4107,29 @@ $('#mobileMapStationStrip')?.addEventListener('click', (e) => {
 
 $('#btnMobileMapLayers')?.addEventListener('click', () => {
   const sheet = $('#mobileMapOptionsSheet');
-  if (sheet) {
-    const isHidden = sheet.hidden;
-    sheet.hidden = !isHidden;
-    $('#btnMobileMapLayers')?.classList.toggle('activo', isHidden);
-  }
+  if (!sheet) return;
+  const isHidden = sheet.hidden;
+  if (isHidden) closeAdminMenu();
+  sheet.hidden = !isHidden;
+  $('#btnMobileMapLayers')?.classList.toggle('activo', isHidden);
 });
 
-$('#btnMobileCloseMapOptions')?.addEventListener('click', () => {
+function cerrarOpcionesDelMapa() {
   const sheet = $('#mobileMapOptionsSheet');
-  if (sheet) {
-    sheet.hidden = true;
-    $('#btnMobileMapLayers')?.classList.remove('activo');
-  }
+  if (!sheet || sheet.hidden) return;
+  sheet.hidden = true;
+  $('#btnMobileMapLayers')?.classList.remove('activo');
+}
+
+$('#btnMobileCloseMapOptions')?.addEventListener('click', cerrarOpcionesDelMapa);
+
+/* El panel de opciones se cierra al tocar fuera de el, igual que cualquier
+   desplegable. Antes solo lo cerraba su aspa y se quedaba abierto encima del
+   mapa. */
+document.addEventListener('click', (event) => {
+  if (event.target.closest('#mobileMapOptionsSheet')) return;
+  if (event.target.closest('#btnMobileMapLayers')) return;
+  cerrarOpcionesDelMapa();
 });
 
 $('#mobileMapBaseLayerSelect')?.addEventListener('change', (e) => {
@@ -4238,6 +4300,7 @@ function toggleAdminMenu(e) {
   const btn = $('#adminMenuBtn');
   if (!panel || !btn) return;
   const willShow = panel.hidden;
+  if (willShow) cerrarOpcionesDelMapa();
   panel.hidden = !willShow;
   btn.setAttribute('aria-expanded', String(willShow));
 }
@@ -4250,13 +4313,25 @@ document.addEventListener('click', (event) => {
 });
 
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') closeAdminMenu();
+  if (event.key === 'Escape') {
+    closeAdminMenu();
+    cerrarOpcionesDelMapa();
+  }
 });
 
 document.addEventListener('click', (event) => {
   const stChip = event.target.closest('[data-req-station-chip]');
   if (stChip) {
-    requestSelectedStationId = stChip.dataset.reqStationChip;
+    const id = stChip.dataset.reqStationChip;
+    if (requestSelectedStationIds.has(id)) requestSelectedStationIds.delete(id);
+    else requestSelectedStationIds.add(id);
+    renderDataRequestForm();
+    return;
+  }
+
+  if (event.target.closest('#toggleAllStationsBtn')) {
+    const todas = state.stations.length > 0 && requestSelectedStationIds.size === state.stations.length;
+    requestSelectedStationIds = todas ? new Set() : new Set(state.stations.map((s) => s.id));
     renderDataRequestForm();
     return;
   }
@@ -4319,7 +4394,7 @@ $('#dataRequestForm')?.addEventListener('submit', async (e) => {
     fullName: (fd.get('fullName') || '').trim(),
     institution: (fd.get('institution') || '').trim(),
     email: (fd.get('email') || '').trim(),
-    stationId: requestSelectedStationId || fd.get('station') || 'all',
+    stationId: idEstacionesSolicitadas() || fd.get('station') || 'all',
     variables,
     startDate,
     endDate,
@@ -4335,7 +4410,7 @@ $('#dataRequestForm')?.addEventListener('submit', async (e) => {
   state.dataRequests.unshift(reqObj);
   saveState();
   formulario.reset();
-  requestSelectedStationId = 'all';
+  requestSelectedStationIds = new Set();
   /* Las variables vuelven a quedar sin marcar, como al entrar */
   $all('#requestVariableChips .sm-var-chip').forEach((c) => c.classList.remove('activa'));
   marcarPresetFecha(null);

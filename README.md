@@ -187,7 +187,7 @@ pongas ahí**. No sirve para guardar un token, ni para validar un acceso.
 
 En la carpeta `servidor/` hay una implementación de referencia que resuelve
 esto y además guarda las lecturas en una base de datos, que es lo que hace que
-el histórico sea real. Cubre las cuatro piezas:
+el histórico sea real. Cubre estas rutas:
 
 | Ruta | Para qué |
 |---|---|
@@ -195,6 +195,8 @@ el histórico sea real. Cubre las cuatro piezas:
 | `/api/get_station_history` | Histórico desde SQLite |
 | `/api/solicitudes` | Registra las solicitudes de datos |
 | `/api/login` | Valida credenciales contra un hash bcrypt |
+| `/api/logout` | Cierra la sesión |
+| `/api/solicitudes` (GET) | Lista lo recibido. Exige sesión de administración |
 
 Arranque:
 

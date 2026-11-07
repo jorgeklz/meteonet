@@ -28,6 +28,7 @@ import Database from 'better-sqlite3';
 import bcrypt from 'bcryptjs';
 import nodemailer from 'nodemailer';
 import crypto from 'node:crypto';
+import { pathToFileURL } from 'node:url';
 import 'dotenv/config';
 
 const PUERTO = Number(process.env.PUERTO || 3001);
@@ -42,8 +43,52 @@ if (!TOKEN) {
 }
 
 const app = express();
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '200kb' }));
 app.use(cors({ origin: ORIGEN_PERMITIDO }));
+
+/* -----------------------------------------------------------------------------
+   Limite de peticiones
+   -----------------------------------------------------------------------------
+   Ventana deslizante en memoria, sin dependencias. Protege el acceso de
+   administracion de la prueba de claves por fuerza bruta y el formulario de
+   solicitudes de que alguien llene la tabla. Detras de varios procesos haria
+   falta un contador compartido (Redis); con un solo proceso esto sirve.
+   -------------------------------------------------------------------------- */
+function limitar({ intentos, ventanaMs, mensaje }) {
+  const visitas = new Map(); // ip -> [marcas de tiempo]
+  return (req, res, next) => {
+    const ip = req.ip || 'desconocida';
+    const ahora = Date.now();
+    const previas = (visitas.get(ip) || []).filter((t) => ahora - t < ventanaMs);
+    if (previas.length >= intentos) {
+      const esperaS = Math.ceil((ventanaMs - (ahora - previas[0])) / 1000);
+      res.set('Retry-After', String(esperaS));
+      return res.status(429).json({ error: mensaje, reintentarEnSegundos: esperaS });
+    }
+    previas.push(ahora);
+    visitas.set(ip, previas);
+    /* Limpieza perezosa: evita que el mapa crezca sin fin. */
+    if (visitas.size > 5000) {
+      for (const [k, v] of visitas) {
+        if (!v.some((t) => ahora - t < ventanaMs)) visitas.delete(k);
+      }
+    }
+    next();
+  };
+}
+
+const limiteAcceso = limitar({
+  intentos: 8,
+  ventanaMs: 10 * 60000,
+  mensaje: 'Demasiados intentos de acceso. Vuelve a probar en unos minutos.',
+});
+
+const limiteSolicitudes = limitar({
+  intentos: 5,
+  ventanaMs: 60 * 60000,
+  mensaje: 'Demasiadas solicitudes seguidas. Vuelve a probar dentro de una hora.',
+});
 
 /* -----------------------------------------------------------------------------
    Base de datos
@@ -82,6 +127,12 @@ db.exec(`
     proposito   TEXT,
     estado      TEXT DEFAULT 'Recibida'
   );
+
+  CREATE TABLE IF NOT EXISTS sesiones (
+    token   TEXT PRIMARY KEY,
+    usuario TEXT NOT NULL,
+    expira  INTEGER NOT NULL
+  );
 `);
 
 const guardarLectura = db.prepare(`
@@ -97,6 +148,14 @@ const consultarLecturas = db.prepare(`
   LIMIT 5000
 `);
 
+const listarSolicitudes = db.prepare(`
+  SELECT id, creada, documento, nombre, institucion, correo, estacion,
+         variables, desde, hasta, proposito, estado
+  FROM solicitudes
+  ORDER BY creada DESC
+  LIMIT 500
+`);
+
 const guardarSolicitud = db.prepare(`
   INSERT INTO solicitudes
     (id, creada, documento, nombre, institucion, correo, estacion, variables, desde, hasta, proposito)
@@ -109,14 +168,13 @@ const guardarSolicitud = db.prepare(`
    El navegador llama a /api/get_stations y /api/get_station_info, sin token.
    Este servidor añade la credencial y reenvía.
    -------------------------------------------------------------------------- */
-const RUTAS_PERMITIDAS = new Set(['get_stations', 'get_station_info']);
-
-app.get('/api/:ruta', async (req, res) => {
-  if (!RUTAS_PERMITIDAS.has(req.params.ruta)) {
-    return res.status(404).json({ error: 'Ruta no permitida' });
-  }
+/* Las rutas se declaran una por una y no con `/api/:ruta`. Con el comodin,
+   Express atendia aqui tambien /api/get_station_history y lo rechazaba antes
+   de llegar a su manejador: el historico quedaba inalcanzable. */
+app.get(['/api/get_stations', '/api/get_station_info'], async (req, res) => {
+  const ruta = req.path.replace('/api/', '');
   try {
-    const url = new URL(req.params.ruta, ORIGEN_API);
+    const url = new URL(ruta, ORIGEN_API);
     for (const [k, v] of Object.entries(req.query)) url.searchParams.set(k, String(v));
     const r = await fetch(url, { headers: TOKEN ? { 'access-token': TOKEN } : {} });
     const datos = await r.json();
@@ -223,7 +281,7 @@ async function avisarSolicitud(solicitud) {
 /* -----------------------------------------------------------------------------
    3. Solicitudes de datos
    -------------------------------------------------------------------------- */
-app.post('/api/solicitudes', async (req, res) => {
+app.post('/api/solicitudes', limiteSolicitudes, async (req, res) => {
   const s = req.body || {};
   if (!s.email || !s.fullName) {
     return res.status(400).json({ error: 'Faltan datos obligatorios' });
@@ -257,33 +315,63 @@ app.post('/api/solicitudes', async (req, res) => {
    La clave se guarda como hash bcrypt en la variable de entorno ADMIN_HASH.
    Para generarlo:  node -e "console.log(require('bcryptjs').hashSync('tuClave',10))"
    -------------------------------------------------------------------------- */
-const sesiones = new Map(); // token -> { usuario, expira }
 const DURACION_SESION_MS = 8 * 3600 * 1000;
 
-app.post('/api/login', (req, res) => {
+/* Las sesiones viven en la base de datos y no en memoria, para que un
+   reinicio del servidor no eche a quien estaba dentro. */
+const crearSesion = db.prepare('INSERT INTO sesiones (token, usuario, expira) VALUES (?, ?, ?)');
+const leerSesion = db.prepare('SELECT usuario, expira FROM sesiones WHERE token = ?');
+const borrarSesion = db.prepare('DELETE FROM sesiones WHERE token = ?');
+const purgarSesiones = db.prepare('DELETE FROM sesiones WHERE expira < ?');
+
+/* Hash de descarte para que el tiempo de respuesta sea el mismo con usuario
+   valido y con usuario inexistente. Sin esto, bcrypt solo corre cuando el
+   usuario acierta y la demora revela cuales existen. */
+const HASH_DESCARTE = bcrypt.hashSync('contrasena-que-no-existe', 10);
+
+app.post('/api/login', limiteAcceso, (req, res) => {
   const { usuario, clave } = req.body || {};
   const usuarioOk = usuario === process.env.ADMIN_USUARIO;
-  const claveOk = usuarioOk && process.env.ADMIN_HASH && bcrypt.compareSync(String(clave || ''), process.env.ADMIN_HASH);
+  const hash = usuarioOk && process.env.ADMIN_HASH ? process.env.ADMIN_HASH : HASH_DESCARTE;
+  const claveOk = bcrypt.compareSync(String(clave || ''), hash);
 
   if (!usuarioOk || !claveOk) {
     return res.status(401).json({ ok: false });
   }
 
   const token = crypto.randomBytes(32).toString('hex');
-  sesiones.set(token, { usuario, expira: Date.now() + DURACION_SESION_MS });
+  purgarSesiones.run(Date.now());
+  crearSesion.run(token, usuario, Date.now() + DURACION_SESION_MS);
   res.json({ ok: true, rol: 'admin', token });
 });
 
-/* Middleware para proteger lo que deba estar protegido */
-export function requiereAdmin(req, res, next) {
+app.post('/api/logout', (req, res) => {
   const token = (req.headers.authorization || '').replace(/^Bearer /, '');
-  const sesion = sesiones.get(token);
+  if (token) borrarSesion.run(token);
+  res.json({ ok: true });
+});
+
+/* Middleware que protege lo que solo debe ver el equipo del observatorio. */
+function requiereAdmin(req, res, next) {
+  const token = (req.headers.authorization || '').replace(/^Bearer /, '');
+  const sesion = token ? leerSesion.get(token) : null;
   if (!sesion || sesion.expira < Date.now()) {
-    sesiones.delete(token);
-    return res.status(401).json({ error: 'Sesión no válida' });
+    if (token) borrarSesion.run(token);
+    return res.status(401).json({ error: 'Sesion no valida' });
   }
+  req.usuario = sesion.usuario;
   next();
 }
+
+/* Listado de solicitudes recibidas. Lleva datos personales de quien solicita,
+   asi que exige sesion. Es la ruta que justifica el middleware de arriba. */
+app.get('/api/solicitudes', requiereAdmin, (req, res) => {
+  const filas = listarSolicitudes.all().map((f) => ({
+    ...f,
+    variables: JSON.parse(f.variables || '[]'),
+  }));
+  res.json({ data: filas });
+});
 
 /* -----------------------------------------------------------------------------
    5. Muestreo periódico
@@ -335,10 +423,19 @@ async function muestrear() {
   }
 }
 
-setInterval(muestrear, MINUTOS_MUESTREO * 60000);
-muestrear();
+/* Solo arranca cuando se ejecuta el archivo. Si se importa, por ejemplo desde
+   una prueba, se obtiene `app` sin levantar el puerto ni el muestreo. */
+const ejecutadoDirectamente =
+  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
-app.listen(PUERTO, () => {
-  console.log(`UTM MeteoNet · servidor en http://localhost:${PUERTO}`);
-  console.log(`Muestreo cada ${MINUTOS_MUESTREO} min · origen ${ORIGEN_API}`);
-});
+if (ejecutadoDirectamente) {
+  setInterval(muestrear, MINUTOS_MUESTREO * 60000);
+  muestrear();
+
+  app.listen(PUERTO, () => {
+    console.log(`UTM MeteoNet · servidor en http://localhost:${PUERTO}`);
+    console.log(`Muestreo cada ${MINUTOS_MUESTREO} min · origen ${ORIGEN_API}`);
+  });
+}
+
+export { app, muestrear };

@@ -1,5 +1,8 @@
 /* Línea gráfica institucional UTM (misma base que AsignacionPosgrados) */
 :root {
+  /* Debe coincidir con VERSION_ESTILOS en app.js. Si el navegador sirve una
+     hoja vieja de la cache, la aplicacion lo detecta y recarga una vez. */
+  --version-estilos: 119;
   --bg: #f7f8f5; --superficie: #ffffff; --superficie2: #f0f2ec; --borde: #e1e5db;
   --texto: #17220f; --texto2: #55604a; --texto3: #7f8a73;
   --g1: #1e6b14; --g2: #2e8a1f; --g3: #4aab30; --g4: #72c255; --g6: #e2f2da;
@@ -535,7 +538,7 @@ button.gm.mal .gm-ir { color: var(--n4); }
 .eu-det .nota { margin: 0 0 8px; }
 
 /* Barra de filtros directos sobre el mapa en Ahora */
-.mapa-barra-filtros { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; background: var(--superficie2); border-bottom: 1px solid var(--borde); border-top-left-radius: var(--r); border-top-right-radius: var(--r); }
+.mapa-barra-filtros { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; background: var(--superficie); border-bottom: 1px solid var(--borde); border-top-left-radius: var(--r); border-top-right-radius: var(--r); }
 .mbf-grupo { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .mbf-etiqueta { font-size: 13px; font-weight: 700; text-transform: none; letter-spacing: normal; color: var(--texto2); }
 
@@ -660,8 +663,8 @@ dialog#modal::backdrop {
 .topbar-meteonet-inner {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 6px 28px;
-  min-height: 136px;
+  padding: 5px 28px;
+  min-height: 108px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -680,7 +683,7 @@ dialog#modal::backdrop {
   text-decoration: none;
 }
 .topbar-logo-meteonet {
-  height: 94px;
+  height: 76px;
   width: auto;
   object-fit: contain;
 }
@@ -690,7 +693,7 @@ dialog#modal::backdrop {
   z-index: 1;
 }
 .topbar-logo-gota {
-  height: 152px;
+  height: 122px;
   width: auto;
   object-fit: contain;
   filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.16));
@@ -872,6 +875,9 @@ dialog#modal::backdrop {
   color: #55604a;
   line-height: 1.4;
   margin: 0;
+  /* Reparte la primera frase entre sus lineas en vez de dejar "ObservaIA"
+     solo al final. El salto antes de la universidad va en el marcado. */
+  text-wrap: balance;
 }
 
 .fv-marca-loc {
@@ -1264,10 +1270,17 @@ a.fv-chip-miembro:hover .fv-ico-in {
   gap: 8px;
   padding: 9px;
   margin-bottom: 12px;
-  border-radius: 12px;
-  /* La imagen de fondo se retiro en la limpieza y dejaba un 404. En su lugar
-     va un degradado de la paleta, que ademas no pesa nada. */
-  background-image: linear-gradient(135deg, #0f4a0b 0%, #1e6b14 45%, #4aab30 100%);
+  border-radius: var(--r);
+  /* Mismo tratamiento que el observatorio original: panel verde oscuro con
+     las fichas translucidas encima. Alli el fondo es una foto de pinos de
+     3.2 MB; si se guarda como assets/images/fondo-pinos.jpg se usa, y si no
+     queda el degradado, que pesa cero. */
+  background-image: linear-gradient(140deg, #123f0d 0%, #1e6b14 48%, #2f7a1d 100%);
+  /* Para usar la foto del observatorio original, guardala como
+     assets/images/fondo-pinos.jpg y antepon su url al degradado:
+     background-image: url('assets/images/fondo-pinos.jpg'), linear-gradient(...); */
+  background-size: cover;
+  background-position: center;
   box-shadow: var(--sombra);
 }
 
@@ -1278,11 +1291,13 @@ a.fv-chip-miembro:hover .fv-ico-in {
   justify-content: space-between;
   width: 100%;
   height: 124px;
-  border-radius: 12px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.16);
+  border-radius: 14px;
   position: relative;
   padding: 7px 8px 8px;
-  background-color: rgba(30, 107, 20, 0.88);
+  /* El verde del observatorio original da 3.74 de contraste con el blanco,
+     por debajo del 4.5 que pide la norma. Este tono se ve practicamente
+     igual y sube a 5.1. */
+  background: rgba(30, 90, 25, 0.62);
   color: #ffffff;
   text-align: center;
   font-family: 'Montserrat', sans-serif;
@@ -1295,11 +1310,15 @@ a.fv-chip-miembro:hover .fv-ico-in {
   gap: 6px;
 }
 
+/* Los PNG de estas variables son siluetas blancas, invisibles sobre fondo
+   claro. Se usan como mascara y el color lo pone el CSS. */
 .rv-icono {
   width: 33px;
   height: 33px;
-  object-fit: contain;
   flex-shrink: 0;
+  background-color: #ffffff;
+  -webkit-mask: var(--icono) center / contain no-repeat;
+  mask: var(--icono) center / contain no-repeat;
 }
 
 .rv-titulo {
@@ -1341,7 +1360,7 @@ a.fv-chip-miembro:hover .fv-ico-in {
 .rv-barra-pista {
   width: 84%;
   height: 6px;
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.28);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -1398,7 +1417,7 @@ a.fv-chip-miembro:hover .fv-ico-in {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1.5px solid #d1d5db;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2302,15 +2321,15 @@ a.fv-chip-miembro:hover .fv-ico-in {
 
 @media (max-width: 768px) {
   .topbar-meteonet-inner {
-    padding: 6px 16px;
-    min-height: 112px;
+    padding: 5px 16px;
+    min-height: 92px;
   }
 
   .topbar-logo-meteonet {
-    height: 64px !important;
+    height: 62px !important;
   }
   .topbar-logo-gota {
-    height: 122px !important;
+    height: 100px !important;
     filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.16));
   }
   .subbar-navegacion {
@@ -2408,16 +2427,24 @@ a.fv-chip-miembro:hover .fv-ico-in {
     color: #fff;
     border-color: #1e6b14;
   }
+  /* Las estaciones se eligen desde una columna a la izquierda, debajo de los
+     botones de zoom, y no desde una tira al pie: abajo competian con la ficha
+     que se abre al tocar un marcador. */
   .mapa-estaciones-flotante-movil {
     display: flex !important;
+    flex-direction: column;
+    align-items: flex-start;
     position: absolute;
-    bottom: 8px;
-    left: 8px;
-    right: 8px;
+    top: 92px;
+    left: 10px;
+    right: auto;
+    bottom: auto;
+    max-height: calc(100% - 104px);
     z-index: 500;
-    gap: 8px;
-    overflow-x: auto;
-    padding: 4px 2px;
+    gap: 6px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 2px;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     pointer-events: auto;
@@ -2428,15 +2455,16 @@ a.fv-chip-miembro:hover .fv-ico-in {
   .mms-chip {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
+    max-width: 148px;
     background: rgba(255, 255, 255, 0.94);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1.5px solid rgba(0, 0, 0, 0.1);
     border-radius: 20px;
-    padding: 6px 12px;
+    padding: 5px 10px;
     font-family: 'Montserrat', sans-serif;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 600;
     color: #2e3a28;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
@@ -2452,9 +2480,20 @@ a.fv-chip-miembro:hover .fv-ico-in {
   }
   .mms-chip-nom {
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Con la ficha de una estacion abierta la columna estorba: se desvanece y
+     vuelve al cerrarla. */
+  .mapa-grande-contenedor.con-ficha .mapa-estaciones-flotante-movil {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease;
   }
   .mms-chip-temp {
     font-weight: 700;
+    flex-shrink: 0;
     padding-left: 6px;
     border-left: 1px solid rgba(0, 0, 0, 0.12);
   }
@@ -2667,8 +2706,9 @@ a.fv-chip-miembro:hover .fv-ico-in {
     max-height: 560px;
   }
   .leaflet-popup-content-wrapper.popup-meteonet-wrap .leaflet-popup-content {
-    width: 245px !important;
-    max-width: calc(100vw - 36px) !important;
+    /* Lo mas ancho que admite la pantalla: con 290 px fijos la letra quedaba
+       diminuta para el espacio disponible. */
+    width: min(88vw, 336px) !important;
   }
   .web-footer-inner {
     flex-direction: column;
@@ -2805,7 +2845,9 @@ a.fv-chip-miembro:hover .fv-ico-in {
 .sm-label-fila {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* El boton de seleccion multiple va pegado a su etiqueta, no al otro
+     extremo de la fila: asi se lee como parte del mismo campo. */
+  justify-content: flex-start;
   gap: 10px;
   flex-wrap: wrap;
 }
@@ -2877,7 +2919,7 @@ a.fv-chip-miembro:hover .fv-ico-in {
 .sm-estacion-chip .sec-check {
   width: 18px;
   height: 18px;
-  border-radius: 50%;
+  border-radius: 6px;
   border: 1.5px solid #9ca3af;
   background: #ffffff;
   color: transparent;
@@ -3679,13 +3721,13 @@ a.fv-chip-miembro:hover .fv-ico-in {
 @media (max-width: 480px) {
   .topbar-meteonet-inner {
     padding: 4px 12px;
-    min-height: 102px;
+    min-height: 84px;
   }
   .topbar-logo-meteonet {
-    height: 56px !important;
+    height: 54px !important;
   }
   .topbar-logo-gota {
-    height: 110px !important;
+    height: 92px !important;
   }
   .subbar-navegacion {
     overflow: visible !important;
@@ -4251,7 +4293,6 @@ a.fv-chip-miembro:hover .fv-ico-in {
   align-items: flex-start;
   gap: 12px;
   background: #f2f7ed;
-  border-left: 4px solid #8cc63f;
   border-radius: 6px;
   padding: 13px 16px;
   margin: 16px 0 18px;
@@ -4954,16 +4995,20 @@ button[data-edit-station]:active {
 
 /* Destinatario de la solicitud, bajo el boton de envio */
 .sm-destino {
-  margin-top: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--borde);
   font-size: var(--fs-sm);
   line-height: 1.5;
   color: var(--texto2);
-  max-width: 62ch;
 }
 
 .sm-destino a {
   color: var(--g1);
   font-weight: 600;
+  /* El correo es una sola palabra larga: en pantallas estrechas tiene que
+     poder partirse, o desborda la tarjeta. */
+  overflow-wrap: anywhere;
 }
 
 /* ---------- Patron por dia en la ficha de la estacion ---------- */
@@ -5055,186 +5100,98 @@ button[data-edit-station]:active {
 }
 
 /* ---------- Ficha de la estacion en movil ----------
-   En móviles la ficha es ultra compacta para caber con total holgura dentro del mapa:
-   se oculta el bloque de 6 gráficas 24h (que se consultan en el panel principal)
-   y se estilizan las métricas esenciales con tipografía y espaciado optimizados. */
+   El espacio vertical es escaso: se quita el bloque de alertas, que ya se
+   consulta tocando el chip de alerta del propio marcador, se compacta el
+   patron y se permite desplazar la ficha si aun asi no cabe. */
 @media (max-width: 768px) {
-  .leaflet-popup-content-wrapper.popup-meteonet-wrap {
-    border-radius: 8px !important;
-    border-width: 1px !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22) !important;
-  }
-
-  .leaflet-popup-content-wrapper.popup-meteonet-wrap .leaflet-popup-content {
-    width: 268px !important;
-    max-width: calc(100vw - 32px) !important;
-    margin: 0 !important;
-  }
-
   .leaflet-popup-content .mapa-ficha-estacion {
-    max-height: min(360px, calc(100vh - 150px)) !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    padding: 5px 7px 6px !important;
+    /* Tope por debajo del alto del mapa, para que el globo nunca sobresalga
+       y la parte que no entre se pueda desplazar. */
+    max-height: 56vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 2px;
   }
 
-  .mfe-actualizacion {
-    font-size: 8px !important;
-    margin-bottom: 2px !important;
-    line-height: 1.15 !important;
-  }
-
-  .mfe-fila-principal {
-    gap: 5px !important;
-  }
-
-  .mfe-icono {
-    width: 22px !important;
-    height: 22px !important;
-  }
-
-  .mfe-nombre {
-    font-size: 11px !important;
-    gap: 4px !important;
-  }
-
-  .mfe-cod-badge {
-    font-size: 8px !important;
-    padding: 0 4px !important;
-  }
-
-  .mfe-condicion {
-    font-size: 9.5px !important;
-  }
-
-  .mfe-temp {
-    font-size: 16px !important;
-  }
-
-  .mfe-temp span {
-    font-size: 9px !important;
-  }
-
-  .mfe-subresumen {
-    font-size: 8px !important;
-    margin-top: 1px !important;
-    line-height: 1.2 !important;
-  }
-
-  .mfe-separador {
-    margin: 3px 0 !important;
-  }
-
-  .mfe-grid-mediciones {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 2.5px !important;
-  }
-
-  .mfe-med-item {
-    padding: 2.5px 4px !important;
-    gap: 3px !important;
-    border-radius: 4px !important;
-  }
-
-  .mfe-ico-min {
-    width: 15px !important;
-    height: 15px !important;
-    border-radius: 3px !important;
-  }
-
-  .mfe-ico-min svg {
-    width: 10px !important;
-    height: 10px !important;
-  }
-
-  .mfe-med-txt small {
-    font-size: 7.5px !important;
-    line-height: 1.1 !important;
-  }
-
-  .mfe-med-txt span {
-    font-size: 9px !important;
-    line-height: 1.1 !important;
-  }
-
-  /* Bloque de ultimas 24 horas en movil: visible, compacto y legible */
   .mfe-patron {
-    display: block !important;
-    margin-top: 4px !important;
-    padding-top: 4px !important;
-    border-top: 1px solid #edf2e8 !important;
-  }
-
-  .mfe-patron-cab {
-    font-size: 9px !important;
-    margin-bottom: 2px !important;
-    display: flex !important;
-    align-items: baseline !important;
-    justify-content: space-between !important;
-  }
-
-  .mfe-patron-cab span {
-    font-size: 9px !important;
-    font-weight: 700 !important;
-    color: #374151 !important;
-  }
-
-  .mfe-patron-cab small {
-    font-size: 7.5px !important;
-    color: #6b7280 !important;
-  }
-
-  .mfe-patron-vacio {
-    font-size: 8.5px !important;
-    line-height: 1.3 !important;
-    color: #6b7280 !important;
-    padding: 3px 0 !important;
+    margin-top: 8px;
+    padding-top: 8px;
   }
 
   .mfp-fila {
-    display: grid !important;
-    grid-template-columns: 72px 1fr auto !important;
-    gap: 4px !important;
-    align-items: center !important;
-    padding: 1.5px 0 !important;
-    border-bottom: 1px solid #f1f4ee !important;
-  }
-
-  .mfp-fila:last-child {
-    border-bottom: none !important;
-  }
-
-  .mfp-dia {
-    font-size: 8px !important;
-    font-weight: 600 !important;
-    color: #4b5563 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    grid-template-columns: 98px 1fr auto;
+    gap: 6px;
+    padding: 1px 0;
   }
 
   .mfp-curva {
-    width: 100% !important;
-    height: 14px !important;
-    display: block !important;
+    height: 22px;
   }
 
+  /* En movil la ficha se lee a un brazo de distancia: nada por debajo de
+     11 px. Lo que no entre se desplaza. */
+  .mfp-dia,
   .mfp-rango {
-    font-size: 8px !important;
-    font-weight: 600 !important;
-    color: #1f2937 !important;
-    white-space: nowrap !important;
-    text-align: right !important;
+    font-size: 11.5px;
   }
 
-  .mfp-rango small {
-    font-size: 7px !important;
-    color: #6b7280 !important;
-    margin-left: 1px !important;
-  }
-
+  .mfp-rango small,
   .mfp-sin {
-    font-size: 8px !important;
-    color: #9ca3af !important;
+    font-size: 10.5px;
+  }
+
+  .mfe-patron-cab {
+    font-size: 12.5px;
+  }
+
+  .mfe-patron-cab small,
+  .mfe-patron-vacio {
+    font-size: 11px;
+  }
+
+  .mfe-actualizacion {
+    font-size: 10.5px;
+  }
+
+  .mfe-icono {
+    width: 33px;
+    height: 33px;
+  }
+
+  .mfe-nombre {
+    font-size: 14.5px;
+  }
+
+  .mfe-cod-badge {
+    font-size: 10.5px;
+  }
+
+  .mfe-condicion {
+    font-size: 12px;
+  }
+
+  .mfe-temp {
+    font-size: 23px;
+  }
+
+  .mfe-temp span {
+    font-size: 11px;
+  }
+
+  .mfe-subresumen {
+    font-size: 11px;
+  }
+
+  .mfe-ico-min {
+    width: 24px;
+    height: 24px;
+  }
+
+  .mfe-med-txt small {
+    font-size: 11px;
+  }
+
+  .mfe-med-txt span {
+    font-size: 12px;
   }
 }
