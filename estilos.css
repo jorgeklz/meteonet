@@ -2,7 +2,7 @@
 :root {
   /* Debe coincidir con VERSION_ESTILOS en app.js. Si el navegador sirve una
      hoja vieja de la cache, la aplicacion lo detecta y recarga una vez. */
-  --version-estilos: 124;
+  --version-estilos: 125;
   --bg: #f7f8f5; --superficie: #ffffff; --superficie2: #f0f2ec; --borde: #e1e5db;
   --texto: #17220f; --texto2: #55604a; --texto3: #7f8a73;
   --g1: #1e6b14; --g2: #2e8a1f; --g3: #4aab30; --g4: #72c255; --g6: #e2f2da;
@@ -1299,7 +1299,7 @@ a.fv-chip-miembro:hover .fv-ico-in {
      a traves. Se oscurece un punto respecto al rgba(67,149,65,.5) de alli,
      porque con aquel valor el texto blanco quedaba en 3.74 de contraste,
      por debajo del 4.5 que pide la norma. */
-  background: rgba(24, 74, 20, 0.55);
+  background: rgba(24, 74, 20, 0.44);
   color: #ffffff;
   text-align: center;
   font-family: 'Montserrat', sans-serif;
