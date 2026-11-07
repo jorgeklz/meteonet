@@ -2,7 +2,7 @@
 :root {
   /* Debe coincidir con VERSION_ESTILOS en app.js. Si el navegador sirve una
      hoja vieja de la cache, la aplicacion lo detecta y recarga una vez. */
-  --version-estilos: 125;
+  --version-estilos: 126;
   --bg: #f7f8f5; --superficie: #ffffff; --superficie2: #f0f2ec; --borde: #e1e5db;
   --texto: #17220f; --texto2: #55604a; --texto3: #7f8a73;
   --g1: #1e6b14; --g2: #2e8a1f; --g3: #4aab30; --g4: #72c255; --g6: #e2f2da;
@@ -1303,6 +1303,18 @@ a.fv-chip-miembro:hover .fv-ico-in {
   color: #ffffff;
   text-align: center;
   font-family: 'Montserrat', sans-serif;
+  /* Efecto cristal: el borde claro y el brillo interior superior simulan
+     el canto de una lamina, y el desenfoque del fondo da el grosor. El
+     navegador que no soporte backdrop-filter se queda con el color
+     translucido, que ya funciona por si solo. */
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-top-color: rgba(255, 255, 255, 0.38);
+  -webkit-backdrop-filter: blur(7px) saturate(125%);
+  backdrop-filter: blur(7px) saturate(125%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
+    0 4px 14px rgba(0, 0, 0, 0.18);
 }
 
 .rv-cab {
