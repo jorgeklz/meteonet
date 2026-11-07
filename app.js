@@ -155,7 +155,7 @@ function formatTemp(valor) {
    La hoja declara `--version-estilos`; si no coincide con esta constante, se
    recarga una sola vez saltando la cache.
    -------------------------------------------------------------------------- */
-const VERSION_ESTILOS = 119;
+const VERSION_ESTILOS = 120;
 
 (function comprobarVersionDeEstilos() {
   const leida = Number(
@@ -1805,8 +1805,8 @@ function renderMainWeatherMap() {
        patron por dia puede rellenarse cuando la ficha ya esta en pantalla. */
     marker.bindPopup(() => buildStationMeasurementCardHtml(st), {
       className: 'popup-meteonet-wrap',
-      maxWidth: 340,
-      minWidth: 300,
+      maxWidth: 316,
+      minWidth: 276,
     });
     /* Al abrir la ficha se desplaza la pagina para que no quede detras de la
        cabecera fija, que en movil ocupa buena parte de lo alto. */

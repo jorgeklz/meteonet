@@ -2,7 +2,7 @@
 :root {
   /* Debe coincidir con VERSION_ESTILOS en app.js. Si el navegador sirve una
      hoja vieja de la cache, la aplicacion lo detecta y recarga una vez. */
-  --version-estilos: 119;
+  --version-estilos: 120;
   --bg: #f7f8f5; --superficie: #ffffff; --superficie2: #f0f2ec; --borde: #e1e5db;
   --texto: #17220f; --texto2: #55604a; --texto3: #7f8a73;
   --g1: #1e6b14; --g2: #2e8a1f; --g3: #4aab30; --g4: #72c255; --g6: #e2f2da;
@@ -1489,7 +1489,7 @@ a.fv-chip-miembro:hover .fv-ico-in {
 }
 .leaflet-popup-content-wrapper.popup-meteonet-wrap .leaflet-popup-content {
   margin: 0;
-  width: 320px !important;
+  width: 296px !important;
 }
 
 .mapa-ficha-estacion {
@@ -2708,7 +2708,7 @@ a.fv-chip-miembro:hover .fv-ico-in {
   .leaflet-popup-content-wrapper.popup-meteonet-wrap .leaflet-popup-content {
     /* Lo mas ancho que admite la pantalla: con 290 px fijos la letra quedaba
        diminuta para el espacio disponible. */
-    width: min(88vw, 336px) !important;
+    width: min(86vw, 312px) !important;
   }
   .web-footer-inner {
     flex-direction: column;
